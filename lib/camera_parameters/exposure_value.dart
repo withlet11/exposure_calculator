@@ -194,7 +194,6 @@ final class ExposureValue {
         if (isAutoIsoMode) {
           adjustIsoSpeed(lightValue);
         }
-      default:
     }
   }
 
