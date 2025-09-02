@@ -26,8 +26,8 @@ import 'constants.dart';
 final class FNumber extends AbstractParameter {
   // 1st value: f-number, 2nd value: aperture value
   static const List<(String, double)> _fullStopList = [
-    ('0.7', -1.0),
-    ('1.0', 0.0),
+    ('0.7', -1.0), // Start value must be an integer
+    ('1.0', 0.0), // interval must be 1
     ('1.4', 1.0),
     ('2.0', 2.0),
     ('2.8', 3.0),
@@ -45,8 +45,8 @@ final class FNumber extends AbstractParameter {
   ];
 
   static const List<(String, double)> _oneHalfStopList = [
-    ('0.7', -1.0),
-    ('0.8', -0.5),
+    ('0.7', -1.0), // Start value must be an integer
+    ('0.8', -0.5), // Interval must be 0.5
     ('1.0', 0.0),
     ('1.2', 0.5),
     ('1.4', 1.0),
@@ -79,8 +79,8 @@ final class FNumber extends AbstractParameter {
   ];
 
   static const List<(String, double)> _oneThirdStopList = [
-    ('0.7', -1.00),
-    ('0.8', -0.67),
+    ('0.7', -1.00), // Start value must be an integer
+    ('0.8', -0.67), // Interval must be 0.33
     ('0.9', -0.33),
     ('1.0', 0.00),
     ('1.1', 0.33),

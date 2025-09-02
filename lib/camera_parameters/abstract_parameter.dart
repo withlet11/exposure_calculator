@@ -72,11 +72,14 @@ abstract class AbstractParameter {
 
   set valueRange(Range range) {
     _valueRange = range;
+    /*
     if (currentIndex > maxIndex) {
       currentIndex = maxIndex;
     } else if (currentIndex < minIndex) {
       currentIndex = minIndex;
     }
+     */
+    currentIndex = currentIndex.clamp(minIndex, maxIndex);
   }
 
   /// The maximum value in the selected range of the current list.
@@ -102,6 +105,7 @@ abstract class AbstractParameter {
   /// Sets current index with the target value
   void setCurrentIndexWithTargetValue(double value) {
     int index = _findClosestIndex(value);
+    /*
     if (index < 0 || index > maxIndex) {
       currentIndex = maxIndex;
     } else if (index < minIndex) {
@@ -109,6 +113,8 @@ abstract class AbstractParameter {
     } else {
       currentIndex = index;
     }
+     */
+    currentIndex = index.clamp(minIndex, maxIndex);
   }
 
   /// The current selected list of parameter.

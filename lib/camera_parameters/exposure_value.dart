@@ -211,7 +211,7 @@ final class ExposureValue {
 
   /// Adjusts the ISO speed as auto exposure (AE).
   void adjustIsoSpeed(double lightValue) {
-    double targetTV = apertureValue + timeValue - lightValue;
-    _isoSpeed.setCurrentIndexWithTargetValue(targetTV);
+    double targetISO = apertureValue + timeValue - lightValue;
+    _isoSpeed.setCurrentIndexWithTargetValue(targetISO);
   }
 }

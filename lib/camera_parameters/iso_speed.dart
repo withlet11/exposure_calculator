@@ -26,8 +26,8 @@ import 'constants.dart';
 final class IsoSpeed extends AbstractParameter {
   // 1st value: ISO speed, 2nd value: sensitivity value
   static const List<(String, double)> _fullStopList = [
-    ('12', -3.0),
-    ('25', -2.0),
+    ('12', -3.0), // Start value must be an integer
+    ('25', -2.0), // Interval must be 1
     ('50', -1.0),
     ('100', 0.0),
     ('200', 1.0),
@@ -45,8 +45,8 @@ final class IsoSpeed extends AbstractParameter {
   ];
 
   static const List<(String, double)> _oneHalfStopList = [
-    ('12', -3.0),
-    ('18', -2.5),
+    ('12', -3.0), // Start value must be an integer
+    ('18', -2.5), // Interval must be 0.5
     ('25', -2.0),
     ('35', -1.5),
     ('50', -1.0),
@@ -69,15 +69,15 @@ final class IsoSpeed extends AbstractParameter {
     ('18000', 7.5),
     ('25600', 8.0),
     ('36000', 8.5),
-    ('51200', 9.0),
+    ('51200', 9.0), // Interval can be changed for large numbers
     ('102400', 10),
     ('204800', 11),
     ('409600', 12),
   ];
 
   static const List<(String, double)> _oneThirdStopList = [
-    ('12', -3.00),
-    ('16', -2.67),
+    ('12', -3.00), // Start value must be an integer
+    ('16', -2.67), // Interval must be 0.33
     ('20', -2.33),
     ('25', -2.00),
     ('32', -1.67),
@@ -112,7 +112,7 @@ final class IsoSpeed extends AbstractParameter {
     ('25600', 8.00),
     ('32000', 8.33),
     ('40000', 8.67),
-    ('51200', 9.00),
+    ('51200', 9.00), // Interval can be changed for large numbers
     ('102400', 10.00),
     ('204800', 11.00),
     ('409600', 12.00),

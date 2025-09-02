@@ -28,7 +28,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:light/light.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import 'camera_parameters/constants.dart';
 import 'camera_parameters/exposure_value.dart';
 import 'gui/exposure_slider.dart';
@@ -119,26 +118,24 @@ class _ExposureCalculatorHomePageState
   @override
   Widget build(BuildContext context) {
     final fNumberStep = ref.watch(fNumberStepProvider);
-    _exposureValue.fNumberStep = fNumberStep;
     final apertureValueRange = ref.watch(apertureValueRangeProvider);
-    _exposureValue.apertureValueRange = apertureValueRange;
-
     final shutterSpeedStep = ref.watch(shutterSpeedStepProvider);
-    _exposureValue.shutterSpeedStep = shutterSpeedStep;
     final timeValueRange = ref.watch(timeValueRangeProvider);
-    _exposureValue.timeValueRange = timeValueRange;
-
     final isoSpeedStep = ref.watch(isoSpeedStepProvider);
-    _exposureValue.isoSpeedStep = isoSpeedStep;
     final sensitivityValueRange = ref.watch(sensitivityValueRangeProvider);
+
+    _exposureValue.fNumberStep = fNumberStep;
+    _exposureValue.apertureValueRange = apertureValueRange;
+    _exposureValue.shutterSpeedStep = shutterSpeedStep;
+    _exposureValue.timeValueRange = timeValueRange;
+    _exposureValue.isoSpeedStep = isoSpeedStep;
     _exposureValue.sensitivityValueRange = sensitivityValueRange;
 
     // Sets sliders.
     final fNumberSliderAction = switch (_exposureValue.exposureMode) {
       ExposureMode.manual || ExposureMode.aperture => (double value) {
           setState(() {
-            _exposureValue.currentFNumberIndex =
-                (value + _exposureValue.minFNumberIndex).round();
+            _exposureValue.currentFNumberIndex = value.round();
           });
         },
       _ => null,
@@ -147,8 +144,7 @@ class _ExposureCalculatorHomePageState
     final shutterSpeedSliderAction = switch (_exposureValue.exposureMode) {
       ExposureMode.manual || ExposureMode.time => (double value) {
           setState(() {
-            _exposureValue.currentShutterSpeedIndex =
-                (value + _exposureValue.minShutterSpeedIndex).round();
+            _exposureValue.currentShutterSpeedIndex = value.round();
           });
         },
       _ => null
@@ -158,8 +154,7 @@ class _ExposureCalculatorHomePageState
         ? null
         : (double value) {
             setState(() {
-              _exposureValue.currentIsoSpeedIndex =
-                  (value + _exposureValue.minIsoSpeedIndex).round();
+              _exposureValue.currentIsoSpeedIndex = value.round();
             });
           };
 
@@ -294,31 +289,46 @@ class _ExposureCalculatorHomePageState
               ],
             ),
             ExposureSlider(
+              key: const ValueKey('fNumberSlider'),
               title: 'F Number',
-              value: _exposureValue.apertureValue,
-              label: _exposureValue.currentFNumber,
-              index: _exposureValue.currentFNumberIndex,
-              minIndex: _exposureValue.minFNumberIndex,
-              maxIndex: _exposureValue.maxFNumberIndex,
+              initialIndex: _exposureValue.currentFNumberIndex,
+              initialMinIndex: _exposureValue.minFNumberIndex,
+              initialMaxIndex: _exposureValue.maxFNumberIndex,
+              initialStep: _exposureValue.fNumberStep.index + 1,
               onChanged: fNumberSliderAction,
+              labelBuilder: (int index) => _exposureValue.currentFNumber,
+              indexToValueMapper: (int index) =>
+                  _exposureValue.fNumberValueList.elementAt(index).$1,
+              indexToEvMapper: (int index) =>
+                  _exposureValue.fNumberValueList.elementAt(index).$2,
             ),
             ExposureSlider(
+              key: const ValueKey('shutterSpeedSlider'),
               title: 'Shutter Speed',
-              value: _exposureValue.timeValue,
-              label: _exposureValue.currentShutterSpeed,
-              index: _exposureValue.currentShutterSpeedIndex,
-              minIndex: _exposureValue.minShutterSpeedIndex,
-              maxIndex: _exposureValue.maxShutterSpeedIndex,
+              initialIndex: _exposureValue.currentShutterSpeedIndex,
+              initialMinIndex: _exposureValue.minShutterSpeedIndex,
+              initialMaxIndex: _exposureValue.maxShutterSpeedIndex,
+              initialStep: _exposureValue.shutterSpeedStep.index + 1,
               onChanged: shutterSpeedSliderAction,
+              labelBuilder: (int index) => _exposureValue.currentShutterSpeed,
+              indexToValueMapper: (int index) =>
+                  _exposureValue.shutterSpeedValueList.elementAt(index).$1,
+              indexToEvMapper: (int index) =>
+                  _exposureValue.shutterSpeedValueList.elementAt(index).$2,
             ),
             ExposureSlider(
+              key: const ValueKey('isoSpeedSlider'),
               title: 'ISO Speed',
-              value: _exposureValue.sensitivityValue,
-              label: _exposureValue.currentIsoSpeed,
-              index: _exposureValue.currentIsoSpeedIndex,
-              minIndex: _exposureValue.minIsoSpeedIndex,
-              maxIndex: _exposureValue.maxIsoSpeedIndex,
+              initialIndex: _exposureValue.currentIsoSpeedIndex,
+              initialMinIndex: _exposureValue.minIsoSpeedIndex,
+              initialMaxIndex: _exposureValue.maxIsoSpeedIndex,
+              initialStep: _exposureValue.isoSpeedStep.index + 1,
               onChanged: isoSpeedSliderAction,
+              labelBuilder: (int index) => _exposureValue.currentIsoSpeed,
+              indexToValueMapper: (int index) =>
+                  _exposureValue.isoSpeedValueList.elementAt(index).$1,
+              indexToEvMapper: (int index) =>
+                  _exposureValue.isoSpeedValueList.elementAt(index).$2,
             ),
           ],
         ),
@@ -327,15 +337,24 @@ class _ExposureCalculatorHomePageState
   }
 
   void loadPreferences(SharedPreferencesAsync prefs) async {
-    final int fNumberStep = await prefs.getInt(_keyFNumberStep) ?? initFNumberIndex;
-    final apertureMax = await prefs.getDouble(_keyApertureMax) ?? initApertureValueRange.max;
-    final apertureMin = await prefs.getDouble(_keyApertureMin) ?? initApertureValueRange.min;
-    final shutterSpeedStep = await prefs.getInt(_keyShutterSpeedStep) ?? initShutterSpeedIndex;
-    final timeMax = await prefs.getDouble(_keyTimeMax) ?? initTimeValueRange.max;
-    final timeMin = await prefs.getDouble(_keyTimeMin) ?? initTimeValueRange.min;
-    final isoSpeedStep = await prefs.getInt(_keyIsoSpeedStep) ?? initIsoSpeedIndex;
-    final sensitivityMax = await prefs.getDouble(_keySensitivityMax) ?? initSensitivityValueRange.max;
-    final sensitivityMin = await prefs.getDouble(_keySensitivityMin) ?? initSensitivityValueRange.min;
+    final int fNumberStep =
+        await prefs.getInt(_keyFNumberStep) ?? initFNumberIndex;
+    final apertureMax =
+        await prefs.getDouble(_keyApertureMax) ?? initApertureValueRange.max;
+    final apertureMin =
+        await prefs.getDouble(_keyApertureMin) ?? initApertureValueRange.min;
+    final shutterSpeedStep =
+        await prefs.getInt(_keyShutterSpeedStep) ?? initShutterSpeedIndex;
+    final timeMax =
+        await prefs.getDouble(_keyTimeMax) ?? initTimeValueRange.max;
+    final timeMin =
+        await prefs.getDouble(_keyTimeMin) ?? initTimeValueRange.min;
+    final isoSpeedStep =
+        await prefs.getInt(_keyIsoSpeedStep) ?? initIsoSpeedIndex;
+    final sensitivityMax = await prefs.getDouble(_keySensitivityMax) ??
+        initSensitivityValueRange.max;
+    final sensitivityMin = await prefs.getDouble(_keySensitivityMin) ??
+        initSensitivityValueRange.min;
 
     setState(() {
       ref.read(fNumberStepProvider.notifier).state = switch (fNumberStep) {
@@ -344,9 +363,11 @@ class _ExposureCalculatorHomePageState
         _ => FractionalStop.oneThirdStop,
       };
 
-      ref.read(apertureValueRangeProvider.notifier).state = Range(apertureMax, apertureMin);
+      ref.read(apertureValueRangeProvider.notifier).state =
+          Range(apertureMax, apertureMin);
 
-      ref.read(shutterSpeedStepProvider.notifier).state = switch (shutterSpeedStep) {
+      ref.read(shutterSpeedStepProvider.notifier).state =
+          switch (shutterSpeedStep) {
         0 => FractionalStop.fullStop,
         1 => FractionalStop.oneHalfStop,
         _ => FractionalStop.oneThirdStop,
@@ -360,7 +381,8 @@ class _ExposureCalculatorHomePageState
         _ => FractionalStop.oneThirdStop,
       };
 
-      ref.read(sensitivityValueRangeProvider.notifier).state = Range(sensitivityMax, sensitivityMin);
+      ref.read(sensitivityValueRangeProvider.notifier).state =
+          Range(sensitivityMax, sensitivityMin);
     });
   }
 

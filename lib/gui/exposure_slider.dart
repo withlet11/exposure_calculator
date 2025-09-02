@@ -21,25 +21,103 @@
 
 import 'package:flutter/material.dart';
 
-class ExposureSlider extends StatelessWidget {
+import 'sliding_scale_slider.dart';
+
+class ExposureSlider extends StatefulWidget {
   final String title;
-  final double value;
-  final String label;
-  final int index;
-  final int minIndex;
-  final int maxIndex;
+  final int initialIndex;
+  final int initialMinIndex;
+  final int initialMaxIndex;
+  final int initialStep;
   final void Function(double)? onChanged;
+  final String Function(int index) labelBuilder;
+  final String Function(int index) indexToValueMapper;
+  final double Function(int index) indexToEvMapper;
 
   const ExposureSlider({
     super.key,
     required this.title,
-    required this.value,
-    required this.label,
-    required this.index,
-    required this.minIndex,
-    required this.maxIndex,
+    required this.initialIndex,
+    required this.initialMinIndex,
+    required this.initialMaxIndex,
+    required this.initialStep,
     required this.onChanged,
+    required this.labelBuilder,
+    required this.indexToValueMapper,
+    required this.indexToEvMapper,
   });
+
+  @override
+  State<ExposureSlider> createState() => _ExposureSliderState();
+}
+
+class _ExposureSliderState extends State<ExposureSlider> {
+  late double _currentValue;
+  late int _currentMinIndex;
+  late int _currentMaxIndex;
+  late int _currentStep;
+  late String _currentEvText;
+  late String _currentValueText;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentValue = 0.0; // It's a dummy value.
+    _currentMinIndex = widget.initialMinIndex;
+    _currentMaxIndex = widget.initialMaxIndex;
+    _currentStep = widget.initialStep;
+    _updateStateFromNewIndex(widget.initialIndex, notifyParent: false);
+  }
+
+  @override
+  void didUpdateWidget(covariant ExposureSlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    bool rangeChanged = (_currentMinIndex != widget.initialMinIndex ||
+        _currentMaxIndex != widget.initialMaxIndex ||
+        _currentStep != widget.initialStep);
+
+    bool indexChanged = widget.initialIndex != oldWidget.initialIndex;
+
+    if (rangeChanged || indexChanged) {
+      _currentMinIndex = widget.initialMinIndex;
+      _currentMaxIndex = widget.initialMaxIndex;
+      _currentStep = widget.initialStep;
+      _updateStateFromNewIndex(widget.initialIndex, notifyParent: false);
+    } else if (widget.indexToValueMapper != oldWidget.indexToValueMapper ||
+        widget.indexToEvMapper != oldWidget.indexToEvMapper) {
+      setState(() {
+        _currentEvText = _makeEVText(widget.initialIndex);
+        _currentValueText = _makeValueText(widget.initialIndex);
+      });
+    }
+  }
+
+  void _updateStateFromNewIndex(int newIndex, {bool notifyParent = true}) {
+    final clampedIndex = newIndex.clamp(_currentMinIndex, _currentMaxIndex);
+    final newValue = clampedIndex.toDouble();
+
+    if (_currentValue != newValue || !mounted) {
+      final newEvText = _makeEVText(newIndex);
+      final newValueText = _makeValueText(newIndex);
+
+      if (mounted) {
+        setState(() {
+          _currentValue = newValue;
+          _currentEvText = newEvText;
+          _currentValueText = newValueText;
+        });
+      } else {
+        _currentValue = newValue;
+        _currentEvText = newEvText;
+        _currentValueText = newValueText;
+      }
+
+      if (notifyParent && widget.onChanged != null) {
+        widget.onChanged!(_currentValue);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,16 +125,28 @@ class ExposureSlider extends StatelessWidget {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('$title [${value.toStringAsFixed(1).padLeft(5)}]'),
-          Text(label, style: Theme.of(context).textTheme.headlineSmall),
+          Text(_currentEvText),
+          Text(_currentValueText,
+              style: Theme.of(context).textTheme.headlineSmall),
         ],
       ),
-      Slider(
-        value: (index - minIndex).toDouble(),
-        max: (maxIndex - minIndex).toDouble(),
-        divisions: maxIndex - minIndex,
-        onChanged: onChanged,
+      SlidingScaleSlider(
+        key: ValueKey('exposure_slider_${widget.title}'),
+        initialValue: _currentValue,
+        initialMinValue: _currentMinIndex.toDouble(),
+        initialMaxValue: _currentMaxIndex.toDouble(),
+        initialEvStep: _currentStep,
+        onChanged: (double sliderValue) {
+          _updateStateFromNewIndex(sliderValue.round(), notifyParent: true);
+        },
+        indexToValueMapper: widget.indexToValueMapper,
+        indexToEvMapper: widget.indexToEvMapper,
       ),
     ]);
   }
+
+  String _makeEVText(int index) => '${widget.title} '
+      '[${widget.indexToEvMapper(index).toStringAsFixed(1).padLeft(5)}]';
+
+  String _makeValueText(int index) => widget.labelBuilder(index);
 }

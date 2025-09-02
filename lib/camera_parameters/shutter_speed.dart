@@ -26,8 +26,8 @@ import 'constants.dart';
 final class ShutterSpeed extends AbstractParameter {
   // 1st value: shutter speed; 2nd value: time value
   static const List<(String, double)> _fullStopList = [
-    ('30', -5.0),
-    ('15', -4.0),
+    ('30', -5.0), // Start value must be an integer
+    ('15', -4.0), // Interval must be 1
     ('8', -3.0),
     ('4', -2.0),
     ('2', -1.0),
@@ -50,8 +50,8 @@ final class ShutterSpeed extends AbstractParameter {
   ];
 
   static const List<(String, double)> _oneHalfStopList = [
-    ('30', -5.0),
-    ('22', -4.5),
+    ('30', -5.0), // Start value must be an integer
+    ('22', -4.5), // Interval must be 0.5
     ('15', -4.0),
     ('12', -3.5),
     ('8', -3.0),
@@ -94,8 +94,8 @@ final class ShutterSpeed extends AbstractParameter {
   ];
 
   static const List<(String, double)> _oneThirdStopList = [
-    ('30', -5.00),
-    ('25', -4.67),
+    ('30', -5.00), // Start value must be an integer
+    ('25', -4.67), // Interval must be 0.33
     ('20', -4.33),
     ('15', -4.00),
     ('13', -3.67),
