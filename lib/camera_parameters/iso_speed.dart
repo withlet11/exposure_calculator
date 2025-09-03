@@ -120,7 +120,7 @@ final class IsoSpeed extends AbstractParameter {
 
   IsoSpeed()
       : super(_fullStopList, _oneHalfStopList, _oneThirdStopList,
-            initIsoSpeedStep, initSensitivityValueRange, initIsoSpeedIndex);
+            initIsoSpeedStep, initSensitivityValueRange, preferIsoSpeedEv);
 
   @override
   String get currentLabel => 'ISO ${list[currentIndex].$1}';

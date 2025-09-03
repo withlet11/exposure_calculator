@@ -126,7 +126,7 @@ final class FNumber extends AbstractParameter {
 
   FNumber()
       : super(_fullStopList, _oneHalfStopList, _oneThirdStopList,
-            initFNumberStep, initApertureValueRange, initFNumberIndex);
+            initFNumberStep, initApertureValueRange, preferFNumberEv);
 
   @override
   String get currentLabel => 'f/${list[currentIndex].$1}';

@@ -26,7 +26,6 @@ import 'iso_speed.dart';
 import 'shutter_speed.dart';
 
 final class ExposureValue {
-  // final _lightingCondition = LightingCondition();
   final _fNumber = FNumber();
   final _shutterSpeed = ShutterSpeed();
   final _isoSpeed = IsoSpeed();
@@ -40,14 +39,14 @@ final class ExposureValue {
     _fNumber.step = fraction;
   }
 
-  /// Shutter speed & Time value
+  /// The step of shutter speed selected currently.
   FractionalStop get shutterSpeedStep => _shutterSpeed.step;
 
   set shutterSpeedStep(FractionalStop fraction) {
     _shutterSpeed.step = fraction;
   }
 
-  /// ISO speed & Sensitivity value
+  /// The step of iso speed selected currently.
   FractionalStop get isoSpeedStep => _isoSpeed.step;
 
   set isoSpeedStep(FractionalStop fraction) {
@@ -84,15 +83,6 @@ final class ExposureValue {
   /// The sensitivity value selected currently.
   double get sensitivityValue => _isoSpeed.currentValue;
 
-  /// The corresponding list of F number and aperture value.
-  List<(String, double)> get fNumberValueList => _fNumber.list;
-
-  /// The corresponding list of shutter speed and time value.
-  List<(String, double)> get shutterSpeedValueList => _shutterSpeed.list;
-
-  /// The corresponding list of ISO speed and sensitivity value.
-  List<(String, double)> get isoSpeedValueList => _isoSpeed.list;
-
   /// The current selected index of F-number.
   int get currentFNumberIndex => _fNumber.currentIndex;
 
@@ -114,32 +104,48 @@ final class ExposureValue {
     _isoSpeed.currentIndex = index;
   }
 
-  /// The lower end of the current selected range of F-number.
+  /// The lower end of the current selected range of F-number, shutter speed
+  /// and ISO speed.
   int get minFNumberIndex => _fNumber.minIndex;
 
-  /// The lower end of the current selected range of shutter speed.
   int get minShutterSpeedIndex => _shutterSpeed.minIndex;
 
-  /// The lower end of the current selected range of ISO speed.
   int get minIsoSpeedIndex => _isoSpeed.minIndex;
 
-  /// The upper end of the current selected range of F-number.
+  /// The upper end of the current selected range of F-number, shutter speed
+  /// and ISO speed.
   int get maxFNumberIndex => _fNumber.maxIndex;
 
-  /// The upper end of the current selected range of shutter speed.
   int get maxShutterSpeedIndex => _shutterSpeed.maxIndex;
 
-  /// The upper end of the current selected range of ISO speed.
   int get maxIsoSpeedIndex => _isoSpeed.maxIndex;
 
-  /// The name of the current F-number.
+  /// The name of the current F-number, the current shutter speed
+  /// and the current ISO speed.
   String get currentFNumber => _fNumber.currentLabel;
 
-  /// The name of the current shutter speed.
   String get currentShutterSpeed => _shutterSpeed.currentLabel;
 
-  /// The name of the current ISO speed.
   String get currentIsoSpeed => _isoSpeed.currentLabel;
+
+  /// The mappers index to parameter value.
+  String Function(int) get indexToFNumberMapper => _fNumber.indexToValueMapper;
+
+  String Function(int) get indexToShutterSpeedMapper =>
+      _shutterSpeed.indexToValueMapper;
+
+  String Function(int) get indexToIsoSpeedMapper =>
+      _isoSpeed.indexToValueMapper;
+
+  /// The mappers index to exposure value.
+  double Function(int) get indexToApertureValueMapper =>
+      _fNumber.indexToEvMapper;
+
+  double Function(int) get indexToTimeValueMapper =>
+      _shutterSpeed.indexToEvMapper;
+
+  double Function(int) get indexToSensitivityValueMapper =>
+      _isoSpeed.indexToEvMapper;
 
   /// Finds F-number with an aperture value.
   static String findFNumber({required double value}) =>
@@ -160,33 +166,44 @@ final class ExposureValue {
   void adjustAll(double lightValue) {
     switch (exposureMode) {
       case ExposureMode.program:
-        // Target is 1/60s
-        _shutterSpeed.setCurrentIndexWithTargetValue(6.0);
+        _fNumber.setCurrentIndexWithPreferValue();
+        _shutterSpeed.setCurrentIndexWithPreferValue();
         if (isAutoIsoMode) {
-          // Target is ISO100
           _isoSpeed.setCurrentIndexWithTargetValue(0.0);
-          adjustFNumber(lightValue);
+          final targetValue1 = (lightValue - exposureValue) / 4 + exposureValue;
+          adjustFNumber(targetValue1);
+          final targetValue2 = (lightValue - exposureValue) / 3 + exposureValue;
+          adjustShutterSpeed(targetValue2);
           adjustIsoSpeed(lightValue);
+          final targetValue3 = (lightValue - exposureValue) / 2 + exposureValue;
+          adjustFNumber(targetValue3);
           adjustShutterSpeed(lightValue);
-        } else {
           adjustFNumber(lightValue);
+        } else {
+          final targetValue = (lightValue - exposureValue) / 2 + exposureValue;
+          adjustFNumber(targetValue);
           adjustShutterSpeed(lightValue);
+          adjustFNumber(lightValue);
         }
       case ExposureMode.aperture:
         if (isAutoIsoMode) {
-          // Target is ISO100
-          _isoSpeed.setCurrentIndexWithTargetValue(0.0);
-          adjustShutterSpeed(lightValue);
+          _isoSpeed.setCurrentIndexWithPreferValue();
+          _shutterSpeed.setCurrentIndexWithPreferValue();
+          final targetValue = (lightValue - exposureValue) / 3 + exposureValue;
+          adjustShutterSpeed(targetValue);
           adjustIsoSpeed(lightValue);
+          adjustShutterSpeed(lightValue);
         } else {
           adjustShutterSpeed(lightValue);
         }
       case ExposureMode.time:
         if (isAutoIsoMode) {
-          // Target is ISO100
-          _isoSpeed.setCurrentIndexWithTargetValue(0.0);
-          adjustFNumber(lightValue);
+          _isoSpeed.setCurrentIndexWithPreferValue();
+          _fNumber.setCurrentIndexWithPreferValue();
+          final targetValue = (lightValue - exposureValue) / 3 + exposureValue;
+          adjustFNumber(targetValue);
           adjustIsoSpeed(lightValue);
+          adjustFNumber(lightValue);
         } else {
           adjustFNumber(lightValue);
         }

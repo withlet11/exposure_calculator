@@ -42,12 +42,15 @@ const List<(ExposureMode, String)> exposureModeName = <(ExposureMode, String)>[
 
 const initFNumberStep = FractionalStop.oneThirdStop;
 const initFNumberIndex = 21; // f/8.0
+const preferFNumberEv = 6.0; // f/8.0
 const initApertureValueRange = Range(14.0, -1.0);
 
 const initShutterSpeedStep = FractionalStop.oneThirdStop;
 const initShutterSpeedIndex = 39; // 1/250s
+const preferShutterSpeedEv = 8.0; // 1/250s
 const initTimeValueRange = Range(15.0, -5.0);
 
 const initIsoSpeedStep = FractionalStop.oneThirdStop;
 const initIsoSpeedIndex = 9; // ISO100
+const preferIsoSpeedEv = 0.0; // ISO100
 const initSensitivityValueRange = Range(12.0, -3.0);

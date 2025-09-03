@@ -250,38 +250,53 @@ class _SlidingScaleSliderState extends State<SlidingScaleSlider> {
           }
         }
 
+        final gestureEnabled = widget.onChanged != null;
+
         return GestureDetector(
-          onPanStart: (DragStartDetails details) {
-            final RenderBox renderBox = context.findRenderObject() as RenderBox;
-            _dragStartPositionX =
-                renderBox.globalToLocal(details.globalPosition).dx;
-            _dragStartValue = _currentValue;
-          },
-          onPanUpdate: (DragUpdateDetails details) {
-            final RenderBox renderBox = context.findRenderObject() as RenderBox;
-            final Offset localPosition =
-                renderBox.globalToLocal(details.globalPosition);
-            handleInteraction(localPosition);
-          },
-          onPanEnd: (DragEndDetails details) {
-            _dragStartPositionX = null;
-            final double snappedValue =
-                _currentValue.roundToDouble(); // Or custom snapping logic
-            if (_currentValue != snappedValue) {
-              _updateStateFromNewValue(snappedValue, notifyParent: true);
-            }
-          },
-          onPanCancel: () {
-            _dragStartPositionX = null;
-          },
-          child: CustomPaint(
-            size: Size(sliderWidth, _defaultHeight),
-            painter: _SlidingScalePainter(
-              value: _currentValue,
-              minValue: _currentMinValue,
-              maxValue: _currentMaxValue,
-              evStep: _currentEvStep,
-              indexToValueMapper: widget.indexToValueMapper,
+          onPanStart: gestureEnabled
+              ? (DragStartDetails details) {
+                  final RenderBox renderBox =
+                      context.findRenderObject() as RenderBox;
+                  _dragStartPositionX =
+                      renderBox.globalToLocal(details.globalPosition).dx;
+                  _dragStartValue = _currentValue;
+                }
+              : null,
+          onPanUpdate: gestureEnabled
+              ? (DragUpdateDetails details) {
+                  final RenderBox renderBox =
+                      context.findRenderObject() as RenderBox;
+                  final Offset localPosition =
+                      renderBox.globalToLocal(details.globalPosition);
+                  handleInteraction(localPosition);
+                }
+              : null,
+          onPanEnd: gestureEnabled
+              ? (DragEndDetails details) {
+                  _dragStartPositionX = null;
+                  final double snappedValue =
+                      _currentValue.roundToDouble(); // Or custom snapping logic
+                  if (_currentValue != snappedValue) {
+                    _updateStateFromNewValue(snappedValue, notifyParent: true);
+                  }
+                }
+              : null,
+          onPanCancel: gestureEnabled
+              ? () {
+                  _dragStartPositionX = null;
+                }
+              : null,
+          child: Opacity(
+            opacity: gestureEnabled ? 1.0 : 0.5,
+            child: CustomPaint(
+              size: Size(sliderWidth, _defaultHeight),
+              painter: _SlidingScalePainter(
+                value: _currentValue,
+                minValue: _currentMinValue,
+                maxValue: _currentMaxValue,
+                evStep: _currentEvStep,
+                indexToValueMapper: widget.indexToValueMapper,
+              ),
             ),
           ),
         );

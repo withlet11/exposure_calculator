@@ -159,7 +159,7 @@ final class ShutterSpeed extends AbstractParameter {
 
   ShutterSpeed()
       : super(_fullStopList, _oneHalfStopList, _oneThirdStopList,
-            initShutterSpeedStep, initTimeValueRange, initShutterSpeedIndex);
+            initShutterSpeedStep, initTimeValueRange, preferShutterSpeedEv);
 
   @override
   String get currentLabel => '${list[currentIndex].$1} s';

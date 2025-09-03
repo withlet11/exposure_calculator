@@ -136,9 +136,12 @@ class _ExposureSliderState extends State<ExposureSlider> {
         initialMinValue: _currentMinIndex.toDouble(),
         initialMaxValue: _currentMaxIndex.toDouble(),
         initialEvStep: _currentStep,
-        onChanged: (double sliderValue) {
-          _updateStateFromNewIndex(sliderValue.round(), notifyParent: true);
-        },
+        onChanged: widget.onChanged == null
+            ? null
+            : (double sliderValue) {
+                _updateStateFromNewIndex(sliderValue.round(),
+                    notifyParent: true);
+              },
         indexToValueMapper: widget.indexToValueMapper,
         indexToEvMapper: widget.indexToEvMapper,
       ),

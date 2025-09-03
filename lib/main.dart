@@ -288,6 +288,7 @@ class _ExposureCalculatorHomePageState
                 ),
               ],
             ),
+            const SizedBox(height: 8),
             ExposureSlider(
               key: const ValueKey('fNumberSlider'),
               title: 'F Number',
@@ -295,13 +296,15 @@ class _ExposureCalculatorHomePageState
               initialMinIndex: _exposureValue.minFNumberIndex,
               initialMaxIndex: _exposureValue.maxFNumberIndex,
               initialStep: _exposureValue.fNumberStep.index + 1,
-              onChanged: fNumberSliderAction,
+              onChanged: (_exposureValue.exposureMode == ExposureMode.manual ||
+                      _exposureValue.exposureMode == ExposureMode.aperture)
+                  ? fNumberSliderAction
+                  : null,
               labelBuilder: (int index) => _exposureValue.currentFNumber,
-              indexToValueMapper: (int index) =>
-                  _exposureValue.fNumberValueList.elementAt(index).$1,
-              indexToEvMapper: (int index) =>
-                  _exposureValue.fNumberValueList.elementAt(index).$2,
+              indexToValueMapper: _exposureValue.indexToFNumberMapper,
+              indexToEvMapper: _exposureValue.indexToApertureValueMapper,
             ),
+            const SizedBox(height: 8),
             ExposureSlider(
               key: const ValueKey('shutterSpeedSlider'),
               title: 'Shutter Speed',
@@ -309,13 +312,15 @@ class _ExposureCalculatorHomePageState
               initialMinIndex: _exposureValue.minShutterSpeedIndex,
               initialMaxIndex: _exposureValue.maxShutterSpeedIndex,
               initialStep: _exposureValue.shutterSpeedStep.index + 1,
-              onChanged: shutterSpeedSliderAction,
+              onChanged: (_exposureValue.exposureMode == ExposureMode.manual ||
+                      _exposureValue.exposureMode == ExposureMode.time)
+                  ? shutterSpeedSliderAction
+                  : null,
               labelBuilder: (int index) => _exposureValue.currentShutterSpeed,
-              indexToValueMapper: (int index) =>
-                  _exposureValue.shutterSpeedValueList.elementAt(index).$1,
-              indexToEvMapper: (int index) =>
-                  _exposureValue.shutterSpeedValueList.elementAt(index).$2,
+              indexToValueMapper: _exposureValue.indexToShutterSpeedMapper,
+              indexToEvMapper: _exposureValue.indexToTimeValueMapper,
             ),
+            const SizedBox(height: 8),
             ExposureSlider(
               key: const ValueKey('isoSpeedSlider'),
               title: 'ISO Speed',
@@ -323,12 +328,11 @@ class _ExposureCalculatorHomePageState
               initialMinIndex: _exposureValue.minIsoSpeedIndex,
               initialMaxIndex: _exposureValue.maxIsoSpeedIndex,
               initialStep: _exposureValue.isoSpeedStep.index + 1,
-              onChanged: isoSpeedSliderAction,
+              onChanged:
+                  !_exposureValue.isAutoIsoMode ? isoSpeedSliderAction : null,
               labelBuilder: (int index) => _exposureValue.currentIsoSpeed,
-              indexToValueMapper: (int index) =>
-                  _exposureValue.isoSpeedValueList.elementAt(index).$1,
-              indexToEvMapper: (int index) =>
-                  _exposureValue.isoSpeedValueList.elementAt(index).$2,
+              indexToValueMapper: _exposureValue.indexToIsoSpeedMapper,
+              indexToEvMapper: _exposureValue.indexToSensitivityValueMapper,
             ),
           ],
         ),

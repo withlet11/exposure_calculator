@@ -38,10 +38,21 @@ abstract class AbstractParameter {
   final List<(String, double)> _oneThirdStopList;
   FractionalStop _step;
   Range _valueRange;
-  int currentIndex;
+  final double _preferValue;
+  late int currentIndex;
+  late int _preferIndex;
 
-  AbstractParameter(this._fullStopList, this._oneHalfStopList,
-      this._oneThirdStopList, this._step, this._valueRange, this.currentIndex);
+  AbstractParameter(
+    this._fullStopList,
+    this._oneHalfStopList,
+    this._oneThirdStopList,
+    this._step,
+    this._valueRange,
+    this._preferValue,
+  ) {
+    _preferIndex = _findClosestIndex(_preferValue);
+    currentIndex = _preferIndex;
+  }
 
   /// The minimum adjustment unit of each exposure parameter.
   ///
@@ -52,16 +63,10 @@ abstract class AbstractParameter {
   set step(FractionalStop fractionalStop) {
     if (_step != fractionalStop) {
       double target = _computeTarget(currentValue, fractionalStop);
-      /*
-      double target = switch (fractionalStop) {
-        FractionalStop.fullStop => currentValue - 0.5,
-        FractionalStop.oneHalfStop => currentValue - 0.25,
-        FractionalStop.oneThirdStop => currentValue,
-      };
-       */
       _step = fractionalStop;
       int index = list.indexWhere((e) => e.$2 >= target);
       currentIndex = index < 0 ? list.length - 1 : index;
+      _preferIndex = _findClosestIndex(_preferValue).clamp(minIndex, maxIndex);
     }
   }
 
@@ -72,13 +77,6 @@ abstract class AbstractParameter {
 
   set valueRange(Range range) {
     _valueRange = range;
-    /*
-    if (currentIndex > maxIndex) {
-      currentIndex = maxIndex;
-    } else if (currentIndex < minIndex) {
-      currentIndex = minIndex;
-    }
-     */
     currentIndex = currentIndex.clamp(minIndex, maxIndex);
   }
 
@@ -102,18 +100,24 @@ abstract class AbstractParameter {
   /// The current selected value.
   double get currentValue => list[currentIndex].$2;
 
+  /// The current prefer value.
+  // double get preferValue => list[_preferIndex].$2;
+  double get preferValue => _preferValue;
+
+  /// The mapper index to parameter value.
+  String Function(int) get indexToValueMapper => (int index) => list[index].$1;
+
+  /// The mapper index to exposure value.
+  double Function(int) get indexToEvMapper => (int index) => list[index].$2;
+
+  /// Sets current index with the prefer value
+  void setCurrentIndexWithPreferValue() {
+    currentIndex = _preferIndex;
+  }
+
   /// Sets current index with the target value
   void setCurrentIndexWithTargetValue(double value) {
     int index = _findClosestIndex(value);
-    /*
-    if (index < 0 || index > maxIndex) {
-      currentIndex = maxIndex;
-    } else if (index < minIndex) {
-      currentIndex = minIndex;
-    } else {
-      currentIndex = index;
-    }
-     */
     currentIndex = index.clamp(minIndex, maxIndex);
   }
 
@@ -127,7 +131,8 @@ abstract class AbstractParameter {
   /// Finds the closest value
   int _findClosestIndex(double value) {
     double target = _computeTarget(value, _step);
-    return list.indexWhere((e) => e.$2 >= target);
+    final index = list.indexWhere((e) => e.$2 >= target);
+    return index < 0 ? list.length - 1 : index;
   }
 
   /// Finds the label of the closest value to [value] in [list].
