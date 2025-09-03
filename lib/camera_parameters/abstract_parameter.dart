@@ -141,10 +141,13 @@ abstract class AbstractParameter {
       list.firstWhere((e) => e.$2 >= value, orElse: () => list.last).$1;
 
   static double _computeTarget(double value, FractionalStop step) =>
-      value -
-      switch (step) {
+      value - _threshold(step);
+
+  static double _threshold(FractionalStop step) => switch (step) {
         FractionalStop.fullStop => 0.5,
         FractionalStop.oneHalfStop => 0.25,
         FractionalStop.oneThirdStop => 0.16,
       };
+
+  double threshold() => _threshold(_step);
 }

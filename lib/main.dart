@@ -164,6 +164,10 @@ class _ExposureCalculatorHomePageState
         .toList();
 
     _exposureValue.adjustAll(_lightingCondition.currentLV());
+    final currentLV = _lightingCondition.currentLV();
+    final exposureValue = _exposureValue.exposureValue;
+    final isExposureValueProper =
+        _exposureValue.isProperForLightValue(currentLV);
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
@@ -181,7 +185,7 @@ class _ExposureCalculatorHomePageState
                     children: [
                       const Text('LV:'),
                       Text(
-                        _roundNumber(_lightingCondition.currentLV()),
+                        _roundNumber(currentLV),
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
                     ],
@@ -195,8 +199,14 @@ class _ExposureCalculatorHomePageState
                     children: [
                       const Text('EV (100):'),
                       Text(
-                        _roundNumber(_exposureValue.exposureValue),
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        _roundNumber(exposureValue),
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(
+                                color: isExposureValueProper
+                                    ? Theme.of(context).colorScheme.onSurface
+                                    : Colors.redAccent),
                       ),
                     ],
                   ),
@@ -238,9 +248,7 @@ class _ExposureCalculatorHomePageState
                 itemHeight: 64,
                 onChanged: (String? value) {
                   setState(() {
-                    if (value != null) {
-                      _lightingCondition.currentCondition = value;
-                    }
+                    _lightingCondition.currentCondition = value!;
                   });
                 },
                 isExpanded: true,
@@ -368,29 +376,19 @@ class _ExposureCalculatorHomePageState
         initSensitivityValueRange.min;
 
     setState(() {
-      ref.read(fNumberStepProvider.notifier).state = switch (fNumberStep) {
-        0 => FractionalStop.fullStop,
-        1 => FractionalStop.oneHalfStop,
-        _ => FractionalStop.oneThirdStop,
-      };
+      ref.read(fNumberStepProvider.notifier).state =
+          _fractionalStopFromInt(fNumberStep);
 
       ref.read(apertureValueRangeProvider.notifier).state =
           Range(apertureMax, apertureMin);
 
       ref.read(shutterSpeedStepProvider.notifier).state =
-          switch (shutterSpeedStep) {
-        0 => FractionalStop.fullStop,
-        1 => FractionalStop.oneHalfStop,
-        _ => FractionalStop.oneThirdStop,
-      };
+          _fractionalStopFromInt(shutterSpeedStep);
 
       ref.read(timeValueRangeProvider.notifier).state = Range(timeMax, timeMin);
 
-      ref.read(isoSpeedStepProvider.notifier).state = switch (isoSpeedStep) {
-        0 => FractionalStop.fullStop,
-        1 => FractionalStop.oneHalfStop,
-        _ => FractionalStop.oneThirdStop,
-      };
+      ref.read(isoSpeedStepProvider.notifier).state =
+          _fractionalStopFromInt(isoSpeedStep);
 
       ref.read(sensitivityValueRangeProvider.notifier).state =
           Range(sensitivityMax, sensitivityMin);
@@ -399,4 +397,10 @@ class _ExposureCalculatorHomePageState
 
   static String _roundNumber(double value) =>
       value.toStringAsFixed(1).padLeft(5);
+
+  FractionalStop _fractionalStopFromInt(int value) => switch (value) {
+        0 => FractionalStop.fullStop,
+        1 => FractionalStop.oneHalfStop,
+        _ => FractionalStop.oneThirdStop,
+      };
 }

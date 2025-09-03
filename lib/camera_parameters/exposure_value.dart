@@ -19,6 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import 'dart:math';
+
 import '../utilities/range.dart';
 import 'constants.dart';
 import 'f_number.dart';
@@ -161,6 +163,11 @@ final class ExposureValue {
 
   /// The exposure value (EV100)
   double get exposureValue => apertureValue + timeValue - sensitivityValue;
+
+  bool isProperForLightValue(double lightValue) =>
+      (lightValue - exposureValue).abs() <=
+      max(max(_fNumber.threshold(), _shutterSpeed.threshold()),
+          _isoSpeed.threshold());
 
   /// Adjusts all parameters as auto exposure (AE).
   void adjustAll(double lightValue) {
