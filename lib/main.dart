@@ -228,27 +228,34 @@ class _ExposureCalculatorHomePageState
                 );
               }).toList(),
             ),
-            DropdownButton<String>(
-              value: _lightingCondition.currentCondition,
-              icon: const Icon(Icons.arrow_downward),
-              itemHeight: 64,
-              onChanged: (String? value) {
-                setState(() {
-                  _lightingCondition.currentCondition = value!;
-                });
-              },
-              isExpanded: true,
-              items: _lightingCondition
-                  .conditionLabelList()
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(
-                    value,
-                    overflow: TextOverflow.visible,
-                  ),
-                );
-              }).toList(),
+            IgnorePointer(
+              ignoring: _lightingCondition.conditionLabelList().length <= 1,
+              child: DropdownButton<String>(
+                value: _lightingCondition.currentCondition,
+                icon: _lightingCondition.conditionLabelList().length > 1
+                    ? const Icon(Icons.arrow_downward)
+                    : const SizedBox.shrink(),
+                itemHeight: 64,
+                onChanged: (String? value) {
+                  setState(() {
+                    if (value != null) {
+                      _lightingCondition.currentCondition = value;
+                    }
+                  });
+                },
+                isExpanded: true,
+                items: _lightingCondition
+                    .conditionLabelList()
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(
+                      value,
+                      overflow: TextOverflow.visible,
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
             const SizedBox(height: 24),
             Text('Camera settings',
