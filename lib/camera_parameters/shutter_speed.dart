@@ -21,6 +21,7 @@
 
 import 'package:exposure_calculator/camera_parameters/abstract_parameter.dart';
 
+import '../utilities/range.dart';
 import 'constants.dart';
 
 final class ShutterSpeed extends AbstractParameter {
@@ -157,12 +158,27 @@ final class ShutterSpeed extends AbstractParameter {
     ('1/32000', 15.00),
   ];
 
-  ShutterSpeed()
-      : super(_fullStopList, _oneHalfStopList, _oneThirdStopList,
-            initShutterSpeedStep, initTimeValueRange, preferShutterSpeedEv);
+  ShutterSpeed({
+    FractionalStop step = initShutterSpeedStep,
+    Range range = initTimeValueRange,
+    double ev = preferShutterSpeedEv,
+  }) : super(_fullStopList, _oneHalfStopList, _oneThirdStopList, step, range,
+            ev);
 
   @override
   String get currentLabel => '${list[currentIndex].$1} s';
+
+  ShutterSpeed copyWith(
+      {FractionalStop? step,
+      Range? valueRange,
+      double? currentValue,
+      int? currentIndex}) {
+    return ShutterSpeed(
+      step: step ?? this.step,
+      range: valueRange ?? this.valueRange.copyWith(),
+      ev: currentValue ?? this.currentValue,
+    )..currentIndex = currentIndex ?? this.currentIndex;
+  }
 
   static String findLabel({required double value}) =>
       AbstractParameter.findLabel(list: _fullStopList, value: value);

@@ -21,6 +21,7 @@
 
 import 'package:exposure_calculator/camera_parameters/abstract_parameter.dart';
 
+import '../utilities/range.dart';
 import 'constants.dart';
 
 final class IsoSpeed extends AbstractParameter {
@@ -118,12 +119,27 @@ final class IsoSpeed extends AbstractParameter {
     ('409600', 12.00),
   ];
 
-  IsoSpeed()
-      : super(_fullStopList, _oneHalfStopList, _oneThirdStopList,
-            initIsoSpeedStep, initSensitivityValueRange, preferIsoSpeedEv);
+  IsoSpeed({
+    FractionalStop step = initIsoSpeedStep,
+    Range range = initSensitivityValueRange,
+    double ev = preferIsoSpeedEv,
+  }) : super(_fullStopList, _oneHalfStopList, _oneThirdStopList, step, range,
+            ev);
 
   @override
   String get currentLabel => 'ISO ${list[currentIndex].$1}';
+
+  IsoSpeed copyWith(
+      {FractionalStop? step,
+      Range? valueRange,
+      double? currentValue,
+      int? currentIndex}) {
+    return IsoSpeed(
+      step: step ?? this.step,
+      range: valueRange ?? this.valueRange.copyWith(),
+      ev: currentValue ?? this.currentValue,
+    )..currentIndex = currentIndex ?? this.currentIndex;
+  }
 
   static String findLabel({required double value}) =>
       AbstractParameter.findLabel(list: _fullStopList, value: value);

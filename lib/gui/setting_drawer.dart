@@ -51,26 +51,21 @@ class _SettingDrawerState extends ConsumerState<SettingDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    final fNumberStep = ref.watch(fNumberStepProvider);
-    final apertureValueRange = ref.watch(apertureValueRangeProvider);
-    final shutterSpeedStep = ref.watch(shutterSpeedStepProvider);
-    final timeValueRange = ref.watch(timeValueRangeProvider);
-    final isoSpeedStep = ref.watch(isoSpeedStepProvider);
-    final sensitivityValueRange = ref.watch(sensitivityValueRangeProvider);
-
+    final cameraSettingsState = ref.watch(cameraSettingsProvider);
+    final cameraSettingsNotifier = ref.watch(cameraSettingsProvider.notifier);
     // Sets button for aperture setting
     List<bool> fNumberStepTypeButtonSelection = FractionalStop.values
-        .map((FractionalStop e) => e == fNumberStep)
+        .map((FractionalStop e) => e == cameraSettingsState.fNumberStep)
         .toList();
 
     // Sets button for shutter speed setting
     List<bool> shutterSpeedStepTypeButtonSelection = FractionalStop.values
-        .map((FractionalStop e) => e == shutterSpeedStep)
+        .map((FractionalStop e) => e == cameraSettingsState.shutterSpeedStep)
         .toList();
 
     // Sets button for shutter ISO setting
     List<bool> isoSpeedStepTypeButtonSelection = FractionalStop.values
-        .map((FractionalStop e) => e == isoSpeedStep)
+        .map((FractionalStop e) => e == cameraSettingsState.isoSpeedStep)
         .toList();
 
     return Drawer(
@@ -90,11 +85,12 @@ class _SettingDrawerState extends ConsumerState<SettingDrawer> {
           trailing: ToggleButtons(
             isSelected: fNumberStepTypeButtonSelection,
             onPressed: (int index) {
-              ref.read(fNumberStepProvider.notifier).state = switch (index) {
+              cameraSettingsNotifier.update(
+                  fNumberStep: switch (index) {
                 0 => FractionalStop.fullStop,
                 1 => FractionalStop.oneHalfStop,
                 _ => FractionalStop.oneThirdStop,
-              };
+              });
               _prefs.setInt(_keyFNumberStep, index);
             },
             constraints: const BoxConstraints(
@@ -108,26 +104,28 @@ class _SettingDrawerState extends ConsumerState<SettingDrawer> {
         ),
         SliderListTile(
           text:
-              'Max [${ExposureValue.findFNumber(value: apertureValueRange.max)}]',
-          value: apertureValueRange.max,
+              'Max [${ExposureValue.findFNumber(value: cameraSettingsState.apertureValueRange.max)}]',
+          value: cameraSettingsState.apertureValueRange.max,
           valueRange: initApertureValueRange,
           onChanged: (double value) {
-            if (value > apertureValueRange.min) {
-              ref.read(apertureValueRangeProvider.notifier).state =
-                  apertureValueRange.copyWith(max: value);
+            final range = cameraSettingsState.apertureValueRange;
+            if (value > range.min) {
+              cameraSettingsNotifier.update(
+                  apertureValueRange: range.copyWith(max: value));
               _prefs.setDouble(_keyApertureMax, value);
             }
           },
         ),
         SliderListTile(
           text:
-              'Min [${ExposureValue.findFNumber(value: apertureValueRange.min)}]',
-          value: apertureValueRange.min,
+              'Min [${ExposureValue.findFNumber(value: cameraSettingsState.apertureValueRange.min)}]',
+          value: cameraSettingsState.apertureValueRange.min,
           valueRange: initApertureValueRange,
           onChanged: (double value) {
-            if (value < apertureValueRange.max) {
-              ref.read(apertureValueRangeProvider.notifier).state =
-                  apertureValueRange.copyWith(min: value);
+            final range = cameraSettingsState.apertureValueRange;
+            if (value < range.max) {
+              cameraSettingsNotifier.update(
+                  apertureValueRange: range.copyWith(min: value));
               _prefs.setDouble(_keyApertureMin, value);
             }
           },
@@ -139,12 +137,12 @@ class _SettingDrawerState extends ConsumerState<SettingDrawer> {
           trailing: ToggleButtons(
             isSelected: shutterSpeedStepTypeButtonSelection,
             onPressed: (int index) {
-              ref.read(shutterSpeedStepProvider.notifier).state =
-                  switch (index) {
+              cameraSettingsNotifier.update(
+                  shutterSpeedStep: switch (index) {
                 0 => FractionalStop.fullStop,
                 1 => FractionalStop.oneHalfStop,
                 _ => FractionalStop.oneThirdStop,
-              };
+              });
               _prefs.setInt(_keyShutterSpeedStep, index);
             },
             // Constraints are used to determine the size of each child widget.
@@ -159,26 +157,28 @@ class _SettingDrawerState extends ConsumerState<SettingDrawer> {
         ),
         SliderListTile(
           text:
-              'Max [${ExposureValue.findShutterSpeed(value: timeValueRange.max)}]',
-          value: timeValueRange.max,
+              'Max [${ExposureValue.findShutterSpeed(value: cameraSettingsState.timeValueRange.max)}]',
+          value: cameraSettingsState.timeValueRange.max,
           valueRange: initTimeValueRange,
           onChanged: (double value) {
-            if (value > timeValueRange.min) {
-              ref.read(timeValueRangeProvider.notifier).state =
-                  timeValueRange.copyWith(max: value);
+            final range = cameraSettingsState.timeValueRange;
+            if (value > range.min) {
+              cameraSettingsNotifier.update(
+                  timeValueRange: range.copyWith(max: value));
               _prefs.setDouble(_keyTimeMax, value);
             }
           },
         ),
         SliderListTile(
           text:
-              'Min [${ExposureValue.findShutterSpeed(value: timeValueRange.min)}]',
-          value: timeValueRange.min,
+              'Min [${ExposureValue.findShutterSpeed(value: cameraSettingsState.timeValueRange.min)}]',
+          value: cameraSettingsState.timeValueRange.min,
           valueRange: initTimeValueRange,
           onChanged: (double value) {
-            if (value < timeValueRange.max) {
-              ref.read(timeValueRangeProvider.notifier).state =
-                  timeValueRange.copyWith(min: value);
+            final range = cameraSettingsState.timeValueRange;
+            if (value < range.max) {
+              cameraSettingsNotifier.update(
+                  timeValueRange: range.copyWith(min: value));
               _prefs.setDouble(_keyTimeMin, value);
             }
           },
@@ -190,11 +190,12 @@ class _SettingDrawerState extends ConsumerState<SettingDrawer> {
           trailing: ToggleButtons(
             isSelected: isoSpeedStepTypeButtonSelection,
             onPressed: (int index) {
-              ref.read(isoSpeedStepProvider.notifier).state = switch (index) {
+              cameraSettingsNotifier.update(
+                  isoSpeedStep: switch (index) {
                 0 => FractionalStop.fullStop,
                 1 => FractionalStop.oneHalfStop,
                 _ => FractionalStop.oneThirdStop,
-              };
+              });
               _prefs.setInt(_keyIsoSpeedStep, index);
             },
             // Constraints are used to determine the size of each child widget.
@@ -209,26 +210,28 @@ class _SettingDrawerState extends ConsumerState<SettingDrawer> {
         ),
         SliderListTile(
           text:
-              'Max [${ExposureValue.findIsoSpeed(value: sensitivityValueRange.max)}]',
-          value: sensitivityValueRange.max,
+              'Max [${ExposureValue.findIsoSpeed(value: cameraSettingsState.sensitivityValueRange.max)}]',
+          value: cameraSettingsState.sensitivityValueRange.max,
           valueRange: initSensitivityValueRange,
           onChanged: (double value) {
-            if (value > sensitivityValueRange.min) {
-              ref.read(sensitivityValueRangeProvider.notifier).state =
-                  sensitivityValueRange.copyWith(max: value);
+            final range = cameraSettingsState.sensitivityValueRange;
+            if (value > range.min) {
+              cameraSettingsNotifier.update(
+                  sensitivityValueRange: range.copyWith(max: value));
               _prefs.setDouble(_keySensitivityMax, value);
             }
           },
         ),
         SliderListTile(
           text:
-              'Min [${ExposureValue.findIsoSpeed(value: sensitivityValueRange.min)}]',
-          value: sensitivityValueRange.min,
+              'Min [${ExposureValue.findIsoSpeed(value: cameraSettingsState.sensitivityValueRange.min)}]',
+          value: cameraSettingsState.sensitivityValueRange.min,
           valueRange: initSensitivityValueRange,
           onChanged: (double value) {
-            if (value < sensitivityValueRange.max) {
-              ref.read(sensitivityValueRangeProvider.notifier).state =
-                  sensitivityValueRange.copyWith(min: value);
+            final range = cameraSettingsState.sensitivityValueRange;
+            if (value < range.max) {
+              cameraSettingsNotifier.update(
+                  sensitivityValueRange: range.copyWith(min: value));
               _prefs.setDouble(_keySensitivityMin, value);
             }
           },

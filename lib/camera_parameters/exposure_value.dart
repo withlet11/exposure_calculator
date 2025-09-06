@@ -22,17 +22,35 @@
 import 'dart:math';
 
 import '../utilities/range.dart';
+import 'camera_settings.dart';
 import 'constants.dart';
 import 'f_number.dart';
 import 'iso_speed.dart';
 import 'shutter_speed.dart';
 
 final class ExposureValue {
-  final _fNumber = FNumber();
-  final _shutterSpeed = ShutterSpeed();
-  final _isoSpeed = IsoSpeed();
+  final FNumber _fNumber;
+  final ShutterSpeed _shutterSpeed;
+  final IsoSpeed _isoSpeed;
   ExposureMode exposureMode = ExposureMode.manual;
   bool isAutoIsoMode = false;
+
+  ExposureValue({
+    FNumber? fNumber,
+    ShutterSpeed? shutterSpeed,
+    IsoSpeed? isoSpeed,
+  })  : _fNumber = fNumber ?? FNumber(),
+        _shutterSpeed = shutterSpeed ?? ShutterSpeed(),
+        _isoSpeed = isoSpeed ?? IsoSpeed();
+
+  void setCameraSettings(CameraSettings cameraSettings) {
+    _fNumber.step = cameraSettings.fNumberStep;
+    _fNumber.valueRange = cameraSettings.apertureValueRange;
+    _shutterSpeed.step = cameraSettings.shutterSpeedStep;
+    _shutterSpeed.valueRange = cameraSettings.timeValueRange;
+    _isoSpeed.step = cameraSettings.isoSpeedStep;
+    _isoSpeed.valueRange = cameraSettings.sensitivityValueRange;
+  }
 
   /// The step of F-Number selected currently.
   FractionalStop get fNumberStep => _fNumber.step;
@@ -165,9 +183,9 @@ final class ExposureValue {
   double get exposureValue => apertureValue + timeValue - sensitivityValue;
 
   bool isProperForLightValue(double lightValue) =>
-      (lightValue - exposureValue).abs() <=
+      (lightValue - exposureValue).abs() <
       max(max(_fNumber.threshold(), _shutterSpeed.threshold()),
-          _isoSpeed.threshold());
+          _isoSpeed.threshold() * 2);
 
   /// Adjusts all parameters as auto exposure (AE).
   void adjustAll(double lightValue) {

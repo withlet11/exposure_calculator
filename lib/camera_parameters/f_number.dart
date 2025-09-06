@@ -21,6 +21,7 @@
 
 import 'package:exposure_calculator/camera_parameters/abstract_parameter.dart';
 
+import '../utilities/range.dart';
 import 'constants.dart';
 
 final class FNumber extends AbstractParameter {
@@ -124,12 +125,24 @@ final class FNumber extends AbstractParameter {
     ('90', 13.00),
   ];
 
-  FNumber()
-      : super(_fullStopList, _oneHalfStopList, _oneThirdStopList,
-            initFNumberStep, initApertureValueRange, preferFNumberEv);
+  FNumber({
+    FractionalStop step = initFNumberStep,
+    Range range = initApertureValueRange,
+    double ev = preferFNumberEv,
+  }) : super(_fullStopList, _oneHalfStopList, _oneThirdStopList, step, range,
+            ev);
 
   @override
   String get currentLabel => 'f/${list[currentIndex].$1}';
+
+  FNumber copyWith(
+      {FractionalStop? step, Range? valueRange, double? currentValue, int? currentIndex}) {
+    return FNumber(
+      step: step ?? this.step,
+      range: valueRange ?? this.valueRange.copyWith(),
+      ev: currentValue ?? this.currentValue,
+    )..currentIndex = currentIndex ?? this.currentIndex;
+  }
 
   static String findLabel({required double value}) =>
       AbstractParameter.findLabel(list: _fullStopList, value: value);

@@ -21,23 +21,33 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../camera_parameters/camera_settings.dart';
 import '../camera_parameters/constants.dart';
 import '../utilities/range.dart';
 
-final fNumberStepProvider =
-    StateProvider<FractionalStop>((ref) => initFNumberStep);
+class CameraSettingsNotifier extends StateNotifier<CameraSettings> {
+  CameraSettingsNotifier() : super(CameraSettings());
 
-final apertureValueRangeProvider =
-    StateProvider<Range>((ref) => initApertureValueRange);
+  void update({
+    FractionalStop? fNumberStep,
+    Range? apertureValueRange,
+    FractionalStop? shutterSpeedStep,
+    Range? timeValueRange,
+    FractionalStop? isoSpeedStep,
+    Range? sensitivityValueRange,
+  }) {
+    state = state.copyWith(
+      fNumberStep: fNumberStep,
+      apertureValueRange: apertureValueRange,
+      shutterSpeedStep: shutterSpeedStep,
+      timeValueRange: timeValueRange,
+      isoSpeedStep: isoSpeedStep,
+      sensitivityValueRange: sensitivityValueRange,
+    );
+  }
+}
 
-final shutterSpeedStepProvider =
-    StateProvider<FractionalStop>((ref) => initShutterSpeedStep);
-
-final timeValueRangeProvider =
-    StateProvider<Range>((ref) => initTimeValueRange);
-
-final isoSpeedStepProvider =
-    StateProvider<FractionalStop>((ref) => initIsoSpeedStep);
-
-final sensitivityValueRangeProvider =
-    StateProvider<Range>((ref) => initSensitivityValueRange);
+final cameraSettingsProvider =
+    StateNotifierProvider<CameraSettingsNotifier, CameraSettings>(
+  (ref) => CameraSettingsNotifier(),
+);

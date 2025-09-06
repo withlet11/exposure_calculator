@@ -117,19 +117,8 @@ class _ExposureCalculatorHomePageState
 
   @override
   Widget build(BuildContext context) {
-    final fNumberStep = ref.watch(fNumberStepProvider);
-    final apertureValueRange = ref.watch(apertureValueRangeProvider);
-    final shutterSpeedStep = ref.watch(shutterSpeedStepProvider);
-    final timeValueRange = ref.watch(timeValueRangeProvider);
-    final isoSpeedStep = ref.watch(isoSpeedStepProvider);
-    final sensitivityValueRange = ref.watch(sensitivityValueRangeProvider);
-
-    _exposureValue.fNumberStep = fNumberStep;
-    _exposureValue.apertureValueRange = apertureValueRange;
-    _exposureValue.shutterSpeedStep = shutterSpeedStep;
-    _exposureValue.timeValueRange = timeValueRange;
-    _exposureValue.isoSpeedStep = isoSpeedStep;
-    _exposureValue.sensitivityValueRange = sensitivityValueRange;
+    final cameraSettingsState = ref.watch(cameraSettingsProvider);
+    _exposureValue.setCameraSettings(cameraSettingsState);
 
     // Sets sliders.
     final fNumberSliderAction = switch (_exposureValue.exposureMode) {
@@ -163,8 +152,8 @@ class _ExposureCalculatorHomePageState
         .map((ExposureMode e) => e == _exposureValue.exposureMode)
         .toList();
 
-    _exposureValue.adjustAll(_lightingCondition.currentLV());
     final currentLV = _lightingCondition.currentLV();
+    _exposureValue.adjustAll(_lightingCondition.currentLV());
     final exposureValue = _exposureValue.exposureValue;
     final isExposureValueProper =
         _exposureValue.isProperForLightValue(currentLV);
@@ -206,7 +195,7 @@ class _ExposureCalculatorHomePageState
                             ?.copyWith(
                                 color: isExposureValueProper
                                     ? Theme.of(context).colorScheme.onSurface
-                                    : Colors.redAccent),
+                                    : Colors.amberAccent),
                       ),
                     ],
                   ),
@@ -357,42 +346,33 @@ class _ExposureCalculatorHomePageState
 
   void loadPreferences(SharedPreferencesAsync prefs) async {
     final int fNumberStep =
-        await prefs.getInt(_keyFNumberStep) ?? initFNumberIndex;
+        await prefs.getInt(_keyFNumberStep) ?? initFNumberStep.index;
     final apertureMax =
         await prefs.getDouble(_keyApertureMax) ?? initApertureValueRange.max;
     final apertureMin =
         await prefs.getDouble(_keyApertureMin) ?? initApertureValueRange.min;
     final shutterSpeedStep =
-        await prefs.getInt(_keyShutterSpeedStep) ?? initShutterSpeedIndex;
+        await prefs.getInt(_keyShutterSpeedStep) ?? initShutterSpeedStep.index;
     final timeMax =
         await prefs.getDouble(_keyTimeMax) ?? initTimeValueRange.max;
     final timeMin =
         await prefs.getDouble(_keyTimeMin) ?? initTimeValueRange.min;
     final isoSpeedStep =
-        await prefs.getInt(_keyIsoSpeedStep) ?? initIsoSpeedIndex;
+        await prefs.getInt(_keyIsoSpeedStep) ?? initIsoSpeedStep.index;
     final sensitivityMax = await prefs.getDouble(_keySensitivityMax) ??
         initSensitivityValueRange.max;
     final sensitivityMin = await prefs.getDouble(_keySensitivityMin) ??
         initSensitivityValueRange.min;
 
-    setState(() {
-      ref.read(fNumberStepProvider.notifier).state =
-          _fractionalStopFromInt(fNumberStep);
+    final cameraSettingsNotifier = ref.watch(cameraSettingsProvider.notifier);
 
-      ref.read(apertureValueRangeProvider.notifier).state =
-          Range(apertureMax, apertureMin);
-
-      ref.read(shutterSpeedStepProvider.notifier).state =
-          _fractionalStopFromInt(shutterSpeedStep);
-
-      ref.read(timeValueRangeProvider.notifier).state = Range(timeMax, timeMin);
-
-      ref.read(isoSpeedStepProvider.notifier).state =
-          _fractionalStopFromInt(isoSpeedStep);
-
-      ref.read(sensitivityValueRangeProvider.notifier).state =
-          Range(sensitivityMax, sensitivityMin);
-    });
+    cameraSettingsNotifier.update(
+        fNumberStep: _fractionalStopFromInt(fNumberStep),
+        apertureValueRange: Range(apertureMax, apertureMin),
+        shutterSpeedStep: _fractionalStopFromInt(shutterSpeedStep),
+        timeValueRange: Range(timeMax, timeMin),
+        isoSpeedStep: _fractionalStopFromInt(isoSpeedStep),
+        sensitivityValueRange: Range(sensitivityMax, sensitivityMin));
   }
 
   static String _roundNumber(double value) =>
