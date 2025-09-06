@@ -26,97 +26,97 @@ import 'constants.dart';
 
 final class IsoSpeed extends AbstractParameter {
   // 1st value: ISO speed, 2nd value: sensitivity value
-  static const List<(String, double)> _fullStopList = [
-    ('12', -3.0), // Start value must be an integer
-    ('25', -2.0), // Interval must be 1
-    ('50', -1.0),
-    ('100', 0.0),
-    ('200', 1.0),
-    ('400', 2.0),
-    ('800', 3.0),
-    ('1600', 4.0),
-    ('3200', 5.0),
-    ('6400', 6.0),
-    ('12800', 7.0),
-    ('25600', 8.0),
-    ('51200', 9.0),
-    ('102400', 10),
-    ('204800', 11),
-    ('409600', 12),
+  static const List<LabelAndValuePair> _fullStopList = [
+    LabelAndValuePair('12', -3.0), // Start value must be an integer
+    LabelAndValuePair('25', -2.0), // Interval must be 1
+    LabelAndValuePair('50', -1.0),
+    LabelAndValuePair('100', 0.0),
+    LabelAndValuePair('200', 1.0),
+    LabelAndValuePair('400', 2.0),
+    LabelAndValuePair('800', 3.0),
+    LabelAndValuePair('1600', 4.0),
+    LabelAndValuePair('3200', 5.0),
+    LabelAndValuePair('6400', 6.0),
+    LabelAndValuePair('12800', 7.0),
+    LabelAndValuePair('25600', 8.0),
+    LabelAndValuePair('51200', 9.0),
+    LabelAndValuePair('102400', 10),
+    LabelAndValuePair('204800', 11),
+    LabelAndValuePair('409600', 12),
   ];
 
-  static const List<(String, double)> _oneHalfStopList = [
-    ('12', -3.0), // Start value must be an integer
-    ('18', -2.5), // Interval must be 0.5
-    ('25', -2.0),
-    ('35', -1.5),
-    ('50', -1.0),
-    ('70', -0.5),
-    ('100', 0.0),
-    ('140', 0.5),
-    ('200', 1.0),
-    ('280', 1.5),
-    ('400', 2.0),
-    ('560', 2.5),
-    ('800', 3.0),
-    ('1100', 3.5),
-    ('1600', 4.0),
-    ('2200', 4.5),
-    ('3200', 5.0),
-    ('4500', 5.5),
-    ('6400', 6.0),
-    ('9000', 6.5),
-    ('12800', 7.0),
-    ('18000', 7.5),
-    ('25600', 8.0),
-    ('36000', 8.5),
-    ('51200', 9.0), // Interval can be changed for large numbers
-    ('102400', 10),
-    ('204800', 11),
-    ('409600', 12),
+  static const List<LabelAndValuePair> _oneHalfStopList = [
+    LabelAndValuePair('12', -3.0), // Start value must be an integer
+    LabelAndValuePair('18', -2.5), // Interval must be 0.5
+    LabelAndValuePair('25', -2.0),
+    LabelAndValuePair('35', -1.5),
+    LabelAndValuePair('50', -1.0),
+    LabelAndValuePair('70', -0.5),
+    LabelAndValuePair('100', 0.0),
+    LabelAndValuePair('140', 0.5),
+    LabelAndValuePair('200', 1.0),
+    LabelAndValuePair('280', 1.5),
+    LabelAndValuePair('400', 2.0),
+    LabelAndValuePair('560', 2.5),
+    LabelAndValuePair('800', 3.0),
+    LabelAndValuePair('1100', 3.5),
+    LabelAndValuePair('1600', 4.0),
+    LabelAndValuePair('2200', 4.5),
+    LabelAndValuePair('3200', 5.0),
+    LabelAndValuePair('4500', 5.5),
+    LabelAndValuePair('6400', 6.0),
+    LabelAndValuePair('9000', 6.5),
+    LabelAndValuePair('12800', 7.0),
+    LabelAndValuePair('18000', 7.5),
+    LabelAndValuePair('25600', 8.0),
+    LabelAndValuePair('36000', 8.5),
+    LabelAndValuePair('51200', 9.0), // Interval can be changed for large numbers
+    LabelAndValuePair('102400', 10),
+    LabelAndValuePair('204800', 11),
+    LabelAndValuePair('409600', 12),
   ];
 
-  static const List<(String, double)> _oneThirdStopList = [
-    ('12', -3.00), // Start value must be an integer
-    ('16', -2.67), // Interval must be 0.33
-    ('20', -2.33),
-    ('25', -2.00),
-    ('32', -1.67),
-    ('40', -1.33),
-    ('50', -1.00),
-    ('64', -0.67),
-    ('80', -0.33),
-    ('100', 0.00),
-    ('125', 0.33),
-    ('160', 0.67),
-    ('200', 1.00),
-    ('250', 1.33),
-    ('320', 1.67),
-    ('400', 2.00),
-    ('500', 2.33),
-    ('640', 2.67),
-    ('800', 3.00),
-    ('1000', 3.33),
-    ('1250', 3.67),
-    ('1600', 4.00),
-    ('2000', 4.33),
-    ('2500', 4.67),
-    ('3200', 5.00),
-    ('4000', 5.33),
-    ('5000', 5.67),
-    ('6400', 6.00),
-    ('8000', 6.33),
-    ('10000', 6.67),
-    ('12800', 7.00),
-    ('16000', 7.33),
-    ('20000', 7.67),
-    ('25600', 8.00),
-    ('32000', 8.33),
-    ('40000', 8.67),
-    ('51200', 9.00), // Interval can be changed for large numbers
-    ('102400', 10.00),
-    ('204800', 11.00),
-    ('409600', 12.00),
+  static const List<LabelAndValuePair> _oneThirdStopList = [
+    LabelAndValuePair('12', -3.00), // Start value must be an integer
+    LabelAndValuePair('16', -2.67), // Interval must be 0.33
+    LabelAndValuePair('20', -2.33),
+    LabelAndValuePair('25', -2.00),
+    LabelAndValuePair('32', -1.67),
+    LabelAndValuePair('40', -1.33),
+    LabelAndValuePair('50', -1.00),
+    LabelAndValuePair('64', -0.67),
+    LabelAndValuePair('80', -0.33),
+    LabelAndValuePair('100', 0.00),
+    LabelAndValuePair('125', 0.33),
+    LabelAndValuePair('160', 0.67),
+    LabelAndValuePair('200', 1.00),
+    LabelAndValuePair('250', 1.33),
+    LabelAndValuePair('320', 1.67),
+    LabelAndValuePair('400', 2.00),
+    LabelAndValuePair('500', 2.33),
+    LabelAndValuePair('640', 2.67),
+    LabelAndValuePair('800', 3.00),
+    LabelAndValuePair('1000', 3.33),
+    LabelAndValuePair('1250', 3.67),
+    LabelAndValuePair('1600', 4.00),
+    LabelAndValuePair('2000', 4.33),
+    LabelAndValuePair('2500', 4.67),
+    LabelAndValuePair('3200', 5.00),
+    LabelAndValuePair('4000', 5.33),
+    LabelAndValuePair('5000', 5.67),
+    LabelAndValuePair('6400', 6.00),
+    LabelAndValuePair('8000', 6.33),
+    LabelAndValuePair('10000', 6.67),
+    LabelAndValuePair('12800', 7.00),
+    LabelAndValuePair('16000', 7.33),
+    LabelAndValuePair('20000', 7.67),
+    LabelAndValuePair('25600', 8.00),
+    LabelAndValuePair('32000', 8.33),
+    LabelAndValuePair('40000', 8.67),
+    LabelAndValuePair('51200', 9.00), // Interval can be changed for large numbers
+    LabelAndValuePair('102400', 10.00),
+    LabelAndValuePair('204800', 11.00),
+    LabelAndValuePair('409600', 12.00),
   ];
 
   IsoSpeed({
@@ -127,7 +127,7 @@ final class IsoSpeed extends AbstractParameter {
             ev);
 
   @override
-  String get currentLabel => 'ISO ${list[currentIndex].$1}';
+  String get currentLabel => 'ISO ${super.currentLabel}';
 
   IsoSpeed copyWith(
       {FractionalStop? step,

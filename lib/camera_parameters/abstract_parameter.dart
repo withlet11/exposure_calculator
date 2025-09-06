@@ -19,8 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import 'package:flutter/cupertino.dart';
+
 import '../utilities/range.dart';
 import 'constants.dart';
+
+// typedef LabelAndValuePair = ({String label, double value});
+class LabelAndValuePair {
+  final String label;
+  final double value;
+
+  const LabelAndValuePair(this.label, this.value);
+}
 
 /// This class is an base class of [FNumber], [ShutterSpeed] and [IsoSpeed].
 ///
@@ -33,14 +43,13 @@ import 'constants.dart';
 ///   TV (time value) 7 -> 1/125 s ((1/2)^7 = 1/128)
 ///   SV (sensitivity value) ⅓ -> ISO 125 (100 * 2^(1/3) = 125.99 ~ 126)
 abstract class AbstractParameter {
-  final List<(String, double)> _fullStopList;
-  final List<(String, double)> _oneHalfStopList;
-  final List<(String, double)> _oneThirdStopList;
+  final List<LabelAndValuePair> _fullStopList;
+  final List<LabelAndValuePair> _oneHalfStopList;
+  final List<LabelAndValuePair> _oneThirdStopList;
   FractionalStop _step;
   Range _valueRange;
   final double _preferValue;
   late int currentIndex;
-  late int _preferIndex;
 
   AbstractParameter(
     this._fullStopList,
@@ -50,8 +59,7 @@ abstract class AbstractParameter {
     this._valueRange,
     this._preferValue,
   ) {
-    _preferIndex = _findClosestIndex(_preferValue);
-    currentIndex = _preferIndex;
+    currentIndex = preferIndex;
   }
 
   /// The minimum adjustment unit of each exposure parameter.
@@ -62,11 +70,10 @@ abstract class AbstractParameter {
 
   set step(FractionalStop fractionalStop) {
     if (_step != fractionalStop) {
-      double target = _computeTarget(currentValue, fractionalStop);
+      double targetEv = _calculateTargetEv(currentValue, fractionalStop);
       _step = fractionalStop;
-      int index = list.indexWhere((e) => e.$2 >= target);
-      currentIndex = index < 0 ? list.length - 1 : index;
-      _preferIndex = _findClosestIndex(_preferValue).clamp(minIndex, maxIndex);
+      int index = _currentStopList.indexWhere((e) => e.value >= targetEv);
+      currentIndex = index < 0 ? maxIndex : index.clamp(minIndex, maxIndex);
     }
   }
 
@@ -83,36 +90,40 @@ abstract class AbstractParameter {
   /// The maximum value in the selected range of the current list.
   int get maxIndex {
     double max = valueRange.max;
-    int index = list.lastIndexWhere((e) => e.$2 <= max);
-    return index < 0 ? list.length - 1 : index;
+    int index = _currentStopList.lastIndexWhere((e) => e.value <= max);
+    return index < 0 ? _currentStopList.length - 1 : index;
   }
 
   /// The minimum value in the selected range of the current list.
   int get minIndex {
     double min = valueRange.min;
-    int index = list.indexWhere((e) => e.$2 >= min);
+    int index = _currentStopList.indexWhere((e) => e.value >= min);
     return index < 0 ? 0 : index;
   }
 
   /// The label of the current selected value.
-  String get currentLabel => list[currentIndex].$1;
+  String get currentLabel => _currentStopList[currentIndex].label;
 
   /// The current selected value.
-  double get currentValue => list[currentIndex].$2;
+  double get currentValue => _currentStopList[currentIndex].value;
 
   /// The current prefer value.
-  // double get preferValue => list[_preferIndex].$2;
   double get preferValue => _preferValue;
 
+  /// The index of the current prefer value.
+  int get preferIndex => _findClosestIndex(_preferValue);
+
   /// The mapper index to parameter value.
-  String Function(int) get indexToValueMapper => (int index) => list[index].$1;
+  String Function(int) get labelForIndex =>
+      (int index) => _currentStopList[index].label;
 
   /// The mapper index to exposure value.
-  double Function(int) get indexToEvMapper => (int index) => list[index].$2;
+  double Function(int) get valueForIndex =>
+      (int index) => _currentStopList[index].value;
 
   /// Sets current index with the prefer value
   void setCurrentIndexWithPreferValue() {
-    currentIndex = _preferIndex;
+    currentIndex = preferIndex;
   }
 
   /// Sets current index with the target value
@@ -122,7 +133,7 @@ abstract class AbstractParameter {
   }
 
   /// The current selected list of parameter.
-  List<(String, double)> get list => switch (step) {
+  List<LabelAndValuePair> get _currentStopList => switch (step) {
         FractionalStop.fullStop => _fullStopList,
         FractionalStop.oneHalfStop => _oneHalfStopList,
         FractionalStop.oneThirdStop => _oneThirdStopList,
@@ -130,24 +141,30 @@ abstract class AbstractParameter {
 
   /// Finds the closest value
   int _findClosestIndex(double value) {
-    double target = _computeTarget(value, _step);
-    final index = list.indexWhere((e) => e.$2 >= target);
-    return index < 0 ? list.length - 1 : index;
+    double target = _calculateTargetEv(value, _step);
+    final index = _currentStopList.indexWhere((e) => e.value >= target);
+    return index < 0 ? _currentStopList.length - 1 : index;
   }
 
   /// Finds the label of the closest value to [value] in [list].
+  @protected
   static String findLabel(
-          {required List<(String, double)> list, required double value}) =>
-      list.firstWhere((e) => e.$2 >= value, orElse: () => list.last).$1;
+          {required List<LabelAndValuePair> list, required double value}) =>
+      list.firstWhere((e) => e.value >= value, orElse: () => list.last).label;
 
-  static double _computeTarget(double value, FractionalStop step) =>
-      value - _threshold(step);
+  static double _calculateTargetEv(double value, FractionalStop step) =>
+      value - _getStepEvThreshold(step);
 
-  static double _threshold(FractionalStop step) => switch (step) {
+  /// Returns the half of the exposure value difference at one step.
+  static double _getStepEvThreshold(FractionalStop step) => switch (step) {
         FractionalStop.fullStop => 0.5,
         FractionalStop.oneHalfStop => 0.25,
         FractionalStop.oneThirdStop => 0.16,
       };
 
-  double threshold() => _threshold(_step);
+  double getEvInterval() => switch (_step) {
+        FractionalStop.fullStop => 1.0,
+        FractionalStop.oneHalfStop => 0.5,
+        FractionalStop.oneThirdStop => 0.33,
+      };
 }

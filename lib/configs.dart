@@ -19,12 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
-
 const appName = 'Exposure Calculator';
 const applicationVersion = '0.0.1';
 const applicationLegalese =
-    'Copyright 2024 Yasuhiro Yamakawa <withlet11@gmail.com>\n\n'
+    'Copyright 2025 Yasuhiro Yamakawa <withlet11@gmail.com>\n\n'
     'Permission is hereby granted, free of charge, to any person obtaining a '
     'copy of this software  and associated documentation files (the '
     '"Software"), to deal in the Software without restriction, including '
@@ -41,3 +39,15 @@ const applicationLegalese =
     'DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR '
     'OTHERWISE, ARISING FROM,  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR '
     'THE USE OR OTHER DEALINGS IN THE SOFTWARE.';
+
+class PrefKeys {
+  static const String fNumberStep = 'fNumberStep';
+  static const String apertureMax = 'apertureMax';
+  static const String apertureMin = 'apertureMin';
+  static const String shutterSpeedStep = 'shutterSpeedStep';
+  static const String timeMax = 'timeMax';
+  static const String timeMin = 'timeMin';
+  static const String isoSpeedStep = 'isoSpeedStep';
+  static const String sensitivityMax = 'sensitivityMax';
+  static const String sensitivityMin = 'sensitivityMin';
+}

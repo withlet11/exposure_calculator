@@ -149,43 +149,29 @@ final class ExposureValue {
   String get currentIsoSpeed => _isoSpeed.currentLabel;
 
   /// The mappers index to parameter value.
-  String Function(int) get indexToFNumberMapper => _fNumber.indexToValueMapper;
+  String Function(int) get indexToFNumberMapper => _fNumber.labelForIndex;
 
   String Function(int) get indexToShutterSpeedMapper =>
-      _shutterSpeed.indexToValueMapper;
+      _shutterSpeed.labelForIndex;
 
-  String Function(int) get indexToIsoSpeedMapper =>
-      _isoSpeed.indexToValueMapper;
+  String Function(int) get indexToIsoSpeedMapper => _isoSpeed.labelForIndex;
 
   /// The mappers index to exposure value.
-  double Function(int) get indexToApertureValueMapper =>
-      _fNumber.indexToEvMapper;
+  double Function(int) get indexToApertureValueMapper => _fNumber.valueForIndex;
 
   double Function(int) get indexToTimeValueMapper =>
-      _shutterSpeed.indexToEvMapper;
+      _shutterSpeed.valueForIndex;
 
   double Function(int) get indexToSensitivityValueMapper =>
-      _isoSpeed.indexToEvMapper;
-
-  /// Finds F-number with an aperture value.
-  static String findFNumber({required double value}) =>
-      FNumber.findLabel(value: value);
-
-  /// Finds shutter speed with a time value.
-  static String findShutterSpeed({required double value}) =>
-      ShutterSpeed.findLabel(value: value);
-
-  /// Finds ISO speed with a sensitivity value.
-  static String findIsoSpeed({required double value}) =>
-      IsoSpeed.findLabel(value: value);
+      _isoSpeed.valueForIndex;
 
   /// The exposure value (EV100)
   double get exposureValue => apertureValue + timeValue - sensitivityValue;
 
   bool isProperForLightValue(double lightValue) =>
       (lightValue - exposureValue).abs() <
-      max(max(_fNumber.threshold(), _shutterSpeed.threshold()),
-          _isoSpeed.threshold() * 2);
+      max(max(_fNumber.getEvInterval(), _shutterSpeed.getEvInterval()),
+          _isoSpeed.getEvInterval());
 
   /// Adjusts all parameters as auto exposure (AE).
   void adjustAll(double lightValue) {

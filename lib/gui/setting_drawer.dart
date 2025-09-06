@@ -25,22 +25,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../camera_parameters/constants.dart';
-import '../camera_parameters/exposure_value.dart';
+import '../camera_parameters/f_number.dart';
+import '../camera_parameters/iso_speed.dart';
+import '../camera_parameters/shutter_speed.dart';
 import '../provider/provider.dart';
 import '../configs.dart';
-
-const _keyFNumberStep = 'fNumberStep';
-const _keyApertureMax = 'apertureMax';
-const _keyApertureMin = 'apertureMin';
-const _keyShutterSpeedStep = 'shutterSpeedStep';
-const _keyTimeMax = 'timeMax';
-const _keyTimeMin = 'timeMin';
-const _keyIsoSpeedStep = 'isoSpeedStep';
-const _keySensitivityMax = 'sensitivityMax';
-const _keySensitivityMin = 'sensitivityMin';
+import '../utilities/range.dart';
 
 class SettingDrawer extends ConsumerStatefulWidget {
-  const SettingDrawer({super.key});
+  final VoidCallback onShowLicenses;
+
+  const SettingDrawer({super.key, required this.onShowLicenses});
 
   @override
   ConsumerState<SettingDrawer> createState() => _SettingDrawerState();
@@ -48,6 +43,41 @@ class SettingDrawer extends ConsumerStatefulWidget {
 
 class _SettingDrawerState extends ConsumerState<SettingDrawer> {
   final _prefs = SharedPreferencesAsync();
+
+  Widget _buildStepSelector({
+    required List<bool> isSelected,
+    required void Function(int) onPressed,
+  }) {
+    return ListTile(
+      title: const Text('Step'),
+      trailing: ToggleButtons(
+        isSelected: isSelected,
+        onPressed: onPressed,
+        constraints: const BoxConstraints(
+          minHeight: 32.0,
+          minWidth: 56.0,
+        ),
+        children: fractionalStopName
+            .map(((FractionalStop, String) stopTuple) => Text(stopTuple.$2))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildRangeSlider({
+    required String labelPrefix,
+    required String Function(double) valueLabelFormatter,
+    required double currentValue,
+    required Range valueRange,
+    required void Function(double) onChanged,
+  }) {
+    return SliderListTile(
+      text: '$labelPrefix [${valueLabelFormatter((currentValue))}]',
+      value: currentValue,
+      valueRange: valueRange,
+      onChanged: onChanged,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,181 +104,138 @@ class _SettingDrawerState extends ConsumerState<SettingDrawer> {
       padding: EdgeInsets.zero,
       children: [
         DrawerHeader(
+          decoration: BoxDecoration(color: Theme.of(context).primaryColor),
           child: Text(
             'Settings',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
         const ListTile(title: Text('F Number')),
-        ListTile(
-          title: const Text('Step'),
-          trailing: ToggleButtons(
-            isSelected: fNumberStepTypeButtonSelection,
-            onPressed: (int index) {
+        _buildStepSelector(
+          isSelected: fNumberStepTypeButtonSelection,
+          onPressed: (int index) {
+            if (index >= 0 && index < FractionalStop.values.length) {
               cameraSettingsNotifier.update(
-                  fNumberStep: switch (index) {
-                0 => FractionalStop.fullStop,
-                1 => FractionalStop.oneHalfStop,
-                _ => FractionalStop.oneThirdStop,
-              });
-              _prefs.setInt(_keyFNumberStep, index);
-            },
-            constraints: const BoxConstraints(
-              minHeight: 32.0,
-              minWidth: 56.0,
-            ),
-            children: fractionalStopName
-                .map(((FractionalStop, String) shirt) => Text(shirt.$2))
-                .toList(),
-          ),
+                  fNumberStep: FractionalStop.values[index]);
+              _prefs.setInt(PrefKeys.fNumberStep, index);
+            }
+          },
         ),
-        SliderListTile(
-          text:
-              'Max [${ExposureValue.findFNumber(value: cameraSettingsState.apertureValueRange.max)}]',
-          value: cameraSettingsState.apertureValueRange.max,
+        _buildRangeSlider(
+          labelPrefix: 'Max',
+          valueLabelFormatter: (value) => FNumber.findLabel(value: value),
+          currentValue: cameraSettingsState.apertureValueRange.max,
           valueRange: initApertureValueRange,
           onChanged: (double value) {
             final range = cameraSettingsState.apertureValueRange;
             if (value > range.min) {
               cameraSettingsNotifier.update(
                   apertureValueRange: range.copyWith(max: value));
-              _prefs.setDouble(_keyApertureMax, value);
+              _prefs.setDouble(PrefKeys.apertureMax, value);
             }
           },
         ),
-        SliderListTile(
-          text:
-              'Min [${ExposureValue.findFNumber(value: cameraSettingsState.apertureValueRange.min)}]',
-          value: cameraSettingsState.apertureValueRange.min,
+        _buildRangeSlider(
+          labelPrefix: 'Min',
+          valueLabelFormatter: (value) => FNumber.findLabel(value: value),
+          currentValue: cameraSettingsState.apertureValueRange.min,
           valueRange: initApertureValueRange,
           onChanged: (double value) {
             final range = cameraSettingsState.apertureValueRange;
             if (value < range.max) {
               cameraSettingsNotifier.update(
                   apertureValueRange: range.copyWith(min: value));
-              _prefs.setDouble(_keyApertureMin, value);
+              _prefs.setDouble(PrefKeys.apertureMin, value);
             }
           },
         ),
         const Divider(),
         const ListTile(title: Text('Shutter Speed')),
-        ListTile(
-          title: const Text('Step'),
-          trailing: ToggleButtons(
-            isSelected: shutterSpeedStepTypeButtonSelection,
-            onPressed: (int index) {
+        _buildStepSelector(
+          isSelected: shutterSpeedStepTypeButtonSelection,
+          onPressed: (int index) {
+            if (index >= 0 && index < FractionalStop.values.length) {
               cameraSettingsNotifier.update(
-                  shutterSpeedStep: switch (index) {
-                0 => FractionalStop.fullStop,
-                1 => FractionalStop.oneHalfStop,
-                _ => FractionalStop.oneThirdStop,
-              });
-              _prefs.setInt(_keyShutterSpeedStep, index);
-            },
-            // Constraints are used to determine the size of each child widget.
-            constraints: const BoxConstraints(
-              minHeight: 32.0,
-              minWidth: 56.0,
-            ),
-            children: fractionalStopName
-                .map(((FractionalStop, String) shirt) => Text(shirt.$2))
-                .toList(),
-          ),
+                  shutterSpeedStep: FractionalStop.values[index]);
+              _prefs.setInt(PrefKeys.shutterSpeedStep, index);
+            }
+          },
         ),
-        SliderListTile(
-          text:
-              'Max [${ExposureValue.findShutterSpeed(value: cameraSettingsState.timeValueRange.max)}]',
-          value: cameraSettingsState.timeValueRange.max,
+        _buildRangeSlider(
+          labelPrefix: 'Max',
+          valueLabelFormatter: (value) => ShutterSpeed.findLabel(value: value),
+          currentValue: cameraSettingsState.timeValueRange.max,
           valueRange: initTimeValueRange,
           onChanged: (double value) {
             final range = cameraSettingsState.timeValueRange;
             if (value > range.min) {
               cameraSettingsNotifier.update(
                   timeValueRange: range.copyWith(max: value));
-              _prefs.setDouble(_keyTimeMax, value);
+              _prefs.setDouble(PrefKeys.timeMax, value);
             }
           },
         ),
-        SliderListTile(
-          text:
-              'Min [${ExposureValue.findShutterSpeed(value: cameraSettingsState.timeValueRange.min)}]',
-          value: cameraSettingsState.timeValueRange.min,
+        _buildRangeSlider(
+          labelPrefix: 'Min',
+          valueLabelFormatter: (value) => ShutterSpeed.findLabel(value: value),
+          currentValue: cameraSettingsState.timeValueRange.min,
           valueRange: initTimeValueRange,
           onChanged: (double value) {
             final range = cameraSettingsState.timeValueRange;
             if (value < range.max) {
               cameraSettingsNotifier.update(
                   timeValueRange: range.copyWith(min: value));
-              _prefs.setDouble(_keyTimeMin, value);
+              _prefs.setDouble(PrefKeys.timeMin, value);
             }
           },
         ),
         const Divider(),
         const ListTile(title: Text('ISO Speed')),
-        ListTile(
-          title: const Text('Step'),
-          trailing: ToggleButtons(
-            isSelected: isoSpeedStepTypeButtonSelection,
-            onPressed: (int index) {
+        _buildStepSelector(
+          isSelected: isoSpeedStepTypeButtonSelection,
+          onPressed: (int index) {
+            if (index >= 0 && index < FractionalStop.values.length) {
               cameraSettingsNotifier.update(
-                  isoSpeedStep: switch (index) {
-                0 => FractionalStop.fullStop,
-                1 => FractionalStop.oneHalfStop,
-                _ => FractionalStop.oneThirdStop,
-              });
-              _prefs.setInt(_keyIsoSpeedStep, index);
-            },
-            // Constraints are used to determine the size of each child widget.
-            constraints: const BoxConstraints(
-              minHeight: 32.0,
-              minWidth: 56.0,
-            ),
-            children: fractionalStopName
-                .map(((FractionalStop, String) shirt) => Text(shirt.$2))
-                .toList(),
-          ),
+                  isoSpeedStep: FractionalStop.values[index]);
+              _prefs.setInt(PrefKeys.isoSpeedStep, index);
+            }
+          },
         ),
-        SliderListTile(
-          text:
-              'Max [${ExposureValue.findIsoSpeed(value: cameraSettingsState.sensitivityValueRange.max)}]',
-          value: cameraSettingsState.sensitivityValueRange.max,
+        _buildRangeSlider(
+          labelPrefix: 'Max',
+          valueLabelFormatter: (value) => IsoSpeed.findLabel(value: value),
+          currentValue: cameraSettingsState.sensitivityValueRange.max,
           valueRange: initSensitivityValueRange,
           onChanged: (double value) {
             final range = cameraSettingsState.sensitivityValueRange;
             if (value > range.min) {
               cameraSettingsNotifier.update(
                   sensitivityValueRange: range.copyWith(max: value));
-              _prefs.setDouble(_keySensitivityMax, value);
+              _prefs.setDouble(PrefKeys.sensitivityMax, value);
             }
           },
         ),
-        SliderListTile(
-          text:
-              'Min [${ExposureValue.findIsoSpeed(value: cameraSettingsState.sensitivityValueRange.min)}]',
-          value: cameraSettingsState.sensitivityValueRange.min,
+        _buildRangeSlider(
+          labelPrefix: 'Min',
+          valueLabelFormatter: (value) => IsoSpeed.findLabel(value: value),
+          currentValue: cameraSettingsState.sensitivityValueRange.min,
           valueRange: initSensitivityValueRange,
           onChanged: (double value) {
             final range = cameraSettingsState.sensitivityValueRange;
             if (value < range.max) {
               cameraSettingsNotifier.update(
                   sensitivityValueRange: range.copyWith(min: value));
-              _prefs.setDouble(_keySensitivityMin, value);
+              _prefs.setDouble(PrefKeys.sensitivityMin, value);
             }
           },
         ),
         const Divider(),
         ListTile(
           title: TextButton(
+            onPressed: widget.onShowLicenses,
             child: const Align(
                 alignment: Alignment.centerLeft,
                 child: Text('Licenses', textAlign: TextAlign.left)),
-            onPressed: () => showLicensePage(
-                context: context,
-                applicationIcon: Image.asset('assets/images/logo144x144.webp',
-                    height: 64.0, width: 64.0),
-                applicationName: appName,
-                applicationVersion: applicationVersion,
-                applicationLegalese: applicationLegalese),
           ),
         ),
       ],

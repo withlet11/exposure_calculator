@@ -30,19 +30,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'camera_parameters/constants.dart';
 import 'camera_parameters/exposure_value.dart';
+import 'configs.dart';
 import 'gui/exposure_slider.dart';
 import 'lighting_condition/lighting_condition.dart';
 import 'gui/setting_drawer.dart';
-
-const _keyFNumberStep = 'fNumberStep';
-const _keyApertureMax = 'apertureMax';
-const _keyApertureMin = 'apertureMin';
-const _keyShutterSpeedStep = 'shutterSpeedStep';
-const _keyTimeMax = 'timeMax';
-const _keyTimeMin = 'timeMin';
-const _keyIsoSpeedStep = 'isoSpeedStep';
-const _keySensitivityMax = 'sensitivityMax';
-const _keySensitivityMin = 'sensitivityMin';
 
 void main() {
   runApp(const ProviderScope(child: ExposureCalculator()));
@@ -160,7 +151,20 @@ class _ExposureCalculatorHomePageState
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
-      drawer: const SettingDrawer(),
+      drawer: SettingDrawer(onShowLicenses: () {
+        Navigator.pop(context);
+        showLicensePage(
+            context: context,
+            /*
+            applicationIcon: SizedBox(
+              child: Image.asset('assets/images/logo144x144.webp',
+                  height: 24.0, width: 24.0),
+            ),
+             */
+            applicationName: appName,
+            applicationVersion: applicationVersion,
+            applicationLegalese: applicationLegalese);
+      }),
       body: Container(
         padding: const EdgeInsets.fromLTRB(32, 8, 32, 0),
         child: Column(
@@ -346,22 +350,22 @@ class _ExposureCalculatorHomePageState
 
   void loadPreferences(SharedPreferencesAsync prefs) async {
     final int fNumberStep =
-        await prefs.getInt(_keyFNumberStep) ?? initFNumberStep.index;
-    final apertureMax =
-        await prefs.getDouble(_keyApertureMax) ?? initApertureValueRange.max;
-    final apertureMin =
-        await prefs.getDouble(_keyApertureMin) ?? initApertureValueRange.min;
-    final shutterSpeedStep =
-        await prefs.getInt(_keyShutterSpeedStep) ?? initShutterSpeedStep.index;
+        await prefs.getInt(PrefKeys.fNumberStep) ?? initFNumberStep.index;
+    final apertureMax = await prefs.getDouble(PrefKeys.apertureMax) ??
+        initApertureValueRange.max;
+    final apertureMin = await prefs.getDouble(PrefKeys.apertureMin) ??
+        initApertureValueRange.min;
+    final shutterSpeedStep = await prefs.getInt(PrefKeys.shutterSpeedStep) ??
+        initShutterSpeedStep.index;
     final timeMax =
-        await prefs.getDouble(_keyTimeMax) ?? initTimeValueRange.max;
+        await prefs.getDouble(PrefKeys.timeMax) ?? initTimeValueRange.max;
     final timeMin =
-        await prefs.getDouble(_keyTimeMin) ?? initTimeValueRange.min;
+        await prefs.getDouble(PrefKeys.timeMin) ?? initTimeValueRange.min;
     final isoSpeedStep =
-        await prefs.getInt(_keyIsoSpeedStep) ?? initIsoSpeedStep.index;
-    final sensitivityMax = await prefs.getDouble(_keySensitivityMax) ??
+        await prefs.getInt(PrefKeys.isoSpeedStep) ?? initIsoSpeedStep.index;
+    final sensitivityMax = await prefs.getDouble(PrefKeys.sensitivityMax) ??
         initSensitivityValueRange.max;
-    final sensitivityMin = await prefs.getDouble(_keySensitivityMin) ??
+    final sensitivityMin = await prefs.getDouble(PrefKeys.sensitivityMin) ??
         initSensitivityValueRange.min;
 
     final cameraSettingsNotifier = ref.watch(cameraSettingsProvider.notifier);
