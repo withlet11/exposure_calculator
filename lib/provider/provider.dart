@@ -25,8 +25,9 @@ import '../camera_parameters/camera_settings.dart';
 import '../camera_parameters/constants.dart';
 import '../utilities/range.dart';
 
-class CameraSettingsNotifier extends StateNotifier<CameraSettings> {
-  CameraSettingsNotifier() : super(CameraSettings());
+class CameraSettingsNotifier extends Notifier<CameraSettings> {
+  @override
+  CameraSettings build() => const CameraSettings();
 
   void update({
     FractionalStop? fNumberStep,
@@ -48,8 +49,8 @@ class CameraSettingsNotifier extends StateNotifier<CameraSettings> {
 }
 
 final cameraSettingsProvider =
-    StateNotifierProvider<CameraSettingsNotifier, CameraSettings>(
-  (ref) => CameraSettingsNotifier(),
+    NotifierProvider<CameraSettingsNotifier, CameraSettings>(
+  CameraSettingsNotifier.new,
 );
 
 /*
