@@ -81,21 +81,25 @@ class _ExposureCalculatorHomePageState
   void initState() {
     super.initState();
 
-    // Starts listening to light sensor.
-    _light = Light();
-    try {
-      lightSensorStatus = LightSensorStatus.working;
-      _subscription = _light?.lightSensorStream.listen((int lux) async {
-        setState(() {
-          _lightingCondition.measuredLux = lux;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Starts listening to light sensor.
+      _light = Light();
+      try {
+        lightSensorStatus = LightSensorStatus.working;
+        _subscription = _light?.lightSensorStream.listen((int lux) {
+          if (mounted) {
+            setState(() {
+              _lightingCondition.measuredLux = lux;
+            });
+          }
         });
-      });
-    } on LightException catch (_) {
-      _lightingCondition.measuredLux = 0;
-      lightSensorStatus = LightSensorStatus.notWorking;
-    }
+      } on LightException catch (_) {
+        _lightingCondition.measuredLux = 0;
+        lightSensorStatus = LightSensorStatus.notWorking;
+      }
 
-    loadPreferences(_prefs);
+      loadPreferences(_prefs);
+    });
   }
 
   @override
